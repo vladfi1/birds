@@ -1,0 +1,40 @@
+CP2: Birdcast Challenge Problem Addendum 1
+
+Here are a few clarifications of the Birdcast problem that have come
+up in recent interactions with the TA2-4 teams:
+
+1. Starting configuration. In the initial state of all of the bird
+   migration simulations, the entire population of birds is in cell 1
+   (which is the "lower left" corner).  You are free to use this
+   fact. The cells are indexed as follows:
+
+   4 8 12 16
+   3 7 11 15
+   2 6 10 14
+   1 5 9  13
+
+   This is for the 4x4 map, of course. The other configurations are
+   analogous.
+
+2. There have been some questions about the constraint that no bird
+   will fly a distance of more than 4.234 cells in a single night.
+   Suppose we consider a probability transition matrix whose (i,j)th
+   entry is the probability that a bird will fly from cell i to cell j
+   in one night. The 4.234 constraint says that this probability will
+   be 0 for cells that are more than 4.234 distance apart. Each cell
+   is of size 1 x 1.  So you can put "structural" zeroes into your
+   transition probability model using this constraint.
+
+3. The documentation says that feature 1 is a noisy version of the
+   distance between cells i and j.  This is incorrect.  Feature 1 is a
+   quantity that is related to the ability of a bird to fly from cell
+   i to cell j.  It behaves approximately as 1/d, where d is the
+   Euclidean distance between the cells.  It is actually computed from
+   a lognormal distribution.
+
+   The four features are intended to be covariates in a logistic
+   regression formula that computes the probability that an individual
+   bird will fly from cell i to cell j in a single night (as a
+   function of these four features).  These are the four features that
+   are used in the "true" model that drives the simulation.
+
