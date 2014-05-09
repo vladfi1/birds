@@ -105,7 +105,7 @@ ripl.assume('get_bird_move_dist', """
 ripl.assume('move', """
   (lambda (y d i)
     (scope_include y d
-      (categorical (get_bird_move_dist y d i))
+      (categorical (scope_include y -1 (get_bird_move_dist y d i)))
     )
   )
 """)
@@ -131,7 +131,7 @@ ripl.assume('count_birds', """
   )
 """)
 
-ripl.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.01))))')
+ripl.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) (exp -100)))))')
 
 features_file = "release/onebird-features.csv"
 observations_file = "release/onebird-observations.csv"
@@ -155,7 +155,7 @@ def loadObservations(years):
         ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
       
       if d > 0:
-        ripl.infer('(mh %d %d %d)' % (y, d-1, 10))
+        ripl.infer('(gibbs %d %d %d)' % (y, d-1, 1))
 
 def getBirds(y, d):
   return [[ripl.sample('(count_birds %d %d (XY2cell %d %d))' % (y, d, x, y)) for y in range(height)] for x in range(width)]
