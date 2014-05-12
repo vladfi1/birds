@@ -59,8 +59,9 @@ ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
 ripl.assume('fold', """
   (lambda (op f len)
     (if (= len 1) (f 0)
-      (let ((l (- len 1)))
-        (op (f l) (fold op f l))
+      (op
+        (f (- len 1))
+        (fold op f (- len 1))
       )
     )
   )
@@ -84,11 +85,9 @@ ripl.assume('phi', """
 ripl.assume('array_from_func', """
   (lambda (f len)
     (if (= len 1) (array (f 0))
-      (let ((l (- len 1)))
-        (append
-          (array_from_func f l)
-          (f l)
-        )
+      (append
+        (array_from_func f (- len 1))
+        (f (- len 1))
       )
     )
   )
@@ -103,9 +102,10 @@ ripl.assume('get_bird_move_dist', """
 """)
 
 # samples where a bird would move to from cell i on day d
+# the bird's id is used to identify the scope
 ripl.assume('move', """
-  (lambda (y d i)
-    (scope_include (quote move) (array y d i)
+  (lambda (y d i id)
+    (scope_include (quote move) (array y d id)
       (categorical (scope_exclude (quote move) (get_bird_move_dist y d i)))
     )
   )
@@ -114,7 +114,7 @@ ripl.assume('move', """
 ripl.assume('get_bird_pos', """
   (mem (lambda (y d id)
     (if (= d 1) atom<0>
-      (move y (- d 1) (get_bird_pos y (- d 1) id))
+      (move y (- d 1) (get_bird_pos y (- d 1) id) id)
     )
   ))
 """)
@@ -173,3 +173,4 @@ years = range(1, 2)
 loadFeatures(years)
 loadObservations(years)
 
+inferMove(2)
