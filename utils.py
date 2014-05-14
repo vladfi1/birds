@@ -51,3 +51,29 @@ def dictToExpr(dict):
 
 def listToExpr(list):
   return expr("array", *list)
+
+
+from subprocess import call
+
+def renderDot(dot,dirpath,i,fmt,colorIgnored):
+  name = "dot%d" % i
+  mkdir_cmd = "mkdir -p " + dirpath
+  print mkdir_cmd
+  call(mkdir_cmd,shell=True)
+  dname = dirpath + "/" + name + ".dot"
+  oname = dirpath + "/" + name + "." + fmt
+  f = open(dname,"w")
+  f.write(dot)
+  f.close()
+  cmd = ["dot", "-T" + fmt, dname, "-o", oname]
+  print cmd
+  call(cmd)
+
+def renderRIPL(dirpath="graphs/onebird",fmt="svg",colorIgnored = False):
+  dots = ripl.sivm.core_sivm.engine.getDistinguishedTrace().dot_trace(colorIgnored)
+  i = 0
+  for dot in dots:
+    print "---dot---"
+    renderDot(dot,dirpath,i,fmt,colorIgnored)
+    i += 1
+
