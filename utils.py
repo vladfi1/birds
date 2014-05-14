@@ -52,6 +52,8 @@ def dictToExpr(dict):
 def listToExpr(list):
   return expr("array", *list)
 
+def fold(op, exp, counter, length):
+  return '(' + op + " ".join([exp.replace(counter, str(i)) for i in range(length)]) + ')'
 
 from subprocess import call
 
