@@ -50,7 +50,7 @@ class Model(object):
       (mem (lambda (k)
         (scope_include
           (quote hypers) k
-          (normal 0 1)
+          (normal 0 10)
         )
       ))
     """)
@@ -129,6 +129,7 @@ class Model(object):
         self.ripl.sivm.observe(['features', s.number(y), s.number(d), s.atom(i), s.atom(j), s.number(k)], s.number(f))
     
     self.ripl.infer('(incorporate)')
+    self.features_likelihood = self.ripl.get_global_logscore()
 
   def loadObservations(self):
     observations_file = "release/%s-observations.csv" % self.name
@@ -153,12 +154,18 @@ class Model(object):
   def getBird(self, y, id):
     return [self.ripl.sample('(get_bird_pos %d %d %d)' % (y, d, id)) for d in self.days]
 
-  def inferMove(self, n):
+  def inferMove(self, n=1):
     self.ripl.infer('(gibbs move one %d)' % n)
 
-  def inferPGibbs(self, y=1, p=10, n=1):
-    self.ripl.infer('(pgibbs %d ordered %d %d)' % (y, p, n))
+  def inferPGibbs(self, p=10, n=1):
+    for y in self.years:
+      self.ripl.infer('(pgibbs %d ordered %d %d)' % (y, p, n))
   
-  def inferHypers(self, n):
+  def inferHypers(self, n=1):
     self.ripl.infer('(mh hypers one %d)' % n)
-
+  
+  def sampleHypers(self):
+    return [self.ripl.sample("(hypers %d)" % k) for k in range(num_features)]
+  
+  def likelihood(self):
+    return self.ripl.get_global_logscore() - self.features_likelihood
