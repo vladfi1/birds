@@ -1,4 +1,4 @@
-
+import venture.shortcuts as s
 
 def parseLine(line):
   return line.strip().split(',')
@@ -18,7 +18,7 @@ def readFeatures(filename):
   data = {}
   
   for row in csv[1:]:
-    keys = tuple(map(int, row[:4]))
+    keys = tuple(int(k)-1 for k in row[:4])
     features = map(float, row[4:])
     data[keys] = features
   
@@ -31,9 +31,19 @@ def readObservations(filename):
   for row in csv[1:]:
     [year, day] = map(int, row[:2])
     cells = map(int, row[2:])
-    update(years, year, (day, cells))
+    update(years, year-1, (day-1, cells))
   
   return years
+
+def toVenture(thing):
+  if isinstance(thing, dict):
+    return s.val("dict", {k:toVenture(v) for k, v in thing.iteritems()})
+  if isinstance(thing, (list, tuple)):
+    return s.val("array", [toVenture(v) for v in thing])
+  if isinstance(thing, (int, float)):
+    return s.number(thing)
+  if isinstance(thing, str):
+    return s.symbol(thing)
 
 # handles numbers, lists, tuples, and dicts
 def toExpr(thing):
@@ -53,7 +63,7 @@ def listToExpr(list):
   return expr("array", *list)
 
 def fold(op, exp, counter, length):
-  return '(' + op + " ".join([exp.replace(counter, str(i)) for i in range(length)]) + ')'
+  return '(' + op + " " + " ".join([exp.replace(counter, str(i)) for i in range(length)]) + ')'
 
 from subprocess import call
 

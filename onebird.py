@@ -12,8 +12,8 @@ total_birds = 1
 Y = 3
 D = 20
 
-years = range(1, Y+1)
-days = range(1, D+1)
+years = range(Y)
+days = range(D)
 
 model = Model(ripl, "onebird", cells, total_birds, years, days)
 print "From prior: ", model.likelihood()

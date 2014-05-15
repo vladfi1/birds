@@ -56,8 +56,8 @@ class Model(object):
     """)
 
     # the features will all be observed
-    ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
-
+    #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
+    
     #ripl.assume('fold', """
     #  (lambda (op f len)
     #    (if (= len 1) (f 0)
@@ -71,11 +71,15 @@ class Model(object):
 
     # phi is the unnormalized probability of a bird moving
     # from cell i to cell j on day d
-    ripl.assume('phi', "(mem (lambda (y d i j) (exp %s)))" % fold('+', '(* (hypers k) (features y d i j k))', 'k', num_features))
+    ripl.assume('phi', """
+      (mem (lambda (y d i j)
+        (let ((fs (lookup features (array y d i j))))
+          (exp %s))))"""
+       % fold('+', '(* (hypers _k_) (lookup fs _k_))', '_k_', num_features))
 
     ripl.assume('get_bird_move_dist',
       '(mem (lambda (y d i) ' +
-        '(simplex ' + ' '.join(['(phi y d i atom<%d>)' % j for j in range(cells)]) + ')' +
+        fold('simplex', '(phi y d i j)', 'j', cells) +
       '))')
 
     # samples where a bird would move to from cell i on day d
@@ -86,17 +90,14 @@ class Model(object):
         (scope_include y d
             (categorical
               (scope_exclude (quote move)
-              (scope_exclude y
-                (get_bird_move_dist y d i)
-              ))
-            )
-        ))
-      )
-    """)
+              (scope_exclude y (get_bird_move_dist y d i)))
+              %s))))"""
+      % fold('array', 'j', 'j', cells)
+    )
 
     ripl.assume('get_bird_pos', """
       (mem (lambda (y d id)
-        (if (= d 1) atom<0>
+        (if (= d 0) 0
           (move y (- d 1) (get_bird_pos y (- d 1) id) id)
         )
       ))
@@ -115,21 +116,9 @@ class Model(object):
 
   def loadFeatures(self):
     features_file = "release/%s-features.csv" % self.name
-
     features = readFeatures(features_file)
+    self.ripl.assume('features', toVenture(features))
     
-    for (y, d, i, j), fs in features.iteritems():
-      if y not in self.years: continue
-      if d not in self.days: continue
-      
-      i -= 1
-      j -= 1
-      
-      for k, f in enumerate(fs):
-        self.ripl.sivm.observe(['features', s.number(y), s.number(d), s.atom(i), s.atom(j), s.number(k)], s.number(f))
-    
-    self.ripl.infer('(incorporate)')
-    self.features_likelihood = self.ripl.get_global_logscore()
 
   def loadObservations(self):
     observations_file = "release/%s-observations.csv" % self.name
@@ -140,12 +129,12 @@ class Model(object):
         if d not in self.days: continue
         for i, n in enumerate(ns):
           print y, d, i
-          self.ripl.observe('(observe_birds %d %d atom<%d>)' % (y, d, i), n)
+          self.ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
     
     self.ripl.infer('(incorporate)')
 
   def getBirds(self, y, d):
-    return [self.ripl.sample('(count_birds %d %d atom<%d>)' % (y, d, i)) for i in range(self.cells)]
+    return [self.ripl.sample('(count_birds %d %d %d)' % (y, d, i)) for i in range(self.cells)]
 
   def printYear(self, y):
     for d in self.days:
@@ -168,4 +157,4 @@ class Model(object):
     return [self.ripl.sample("(hypers %d)" % k) for k in range(num_features)]
   
   def likelihood(self):
-    return self.ripl.get_global_logscore() - self.features_likelihood
+    return self.ripl.get_global_logscore()
