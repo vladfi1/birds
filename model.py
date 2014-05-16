@@ -72,7 +72,9 @@ class BirdsModel(VentureUnit):
       '(mem (lambda (y d i) ' +
         fold('simplex', '(phi y d i j)', 'j', cells) +
       '))')
-
+    
+    self.assume('cell_array', fold('array', 'j', 'j', cells))
+    
     # samples where a bird would move to from cell i on day d
     # the bird's id is used to identify the scope
     self.assume('move', """
@@ -82,9 +84,7 @@ class BirdsModel(VentureUnit):
             (categorical
               (scope_exclude (quote move)
               (scope_exclude y (get_bird_move_dist y d i)))
-              %s))))"""
-      % fold('array', 'j', 'j', cells)
-    )
+              cell_array))))""")
 
     self.assume('get_bird_pos', """
       (mem (lambda (y d id)
