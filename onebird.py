@@ -28,5 +28,7 @@ def sweep(r, *args):
   r.infer('(gibbs move one %d)' % 5)
   r.infer('(mh hypers one 4)')
 
-history, _ = model.runFromConditional(Y * D, runs=3, infer=sweep)
-history.save(directory = "onebird")
+directory = "onebird"
+history, _ = model.runFromConditional(Y * D, runs=3, infer=sweep, verbose=True)
+history.save(directory = directory)
+history.plot('logscore', directory = directory)
