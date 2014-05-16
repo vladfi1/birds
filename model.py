@@ -1,17 +1,14 @@
 import venture.shortcuts as s
 from utils import *
+from venture.unit import VentureUnit
 
 num_features = 4
 
-class Model(object):
-  def __init__(self, ripl, name, cells, total_birds, years, days):
-  
-    self.ripl = ripl
-    self.name = name
-    self.cells = cells
-    self.total_birds = total_birds
-    self.years = years
-    self.days = days
+class BirdsModel(VentureUnit):
+  def makeAssumes(self):
+    name = self.parameters["name"]
+    cells = self.parameters["cells"]
+    total_birds = self.parameters["total_birds"]
     
     #ripl.assume('width', width)
     #ripl.assume('height', height)
@@ -43,22 +40,16 @@ class Model(object):
     #  )
     #""")
 
-    #ripl.assume('num_features', num_features)
+    #self.assume('num_features', num_features)
 
     # we want to infer the hyperparameters of a log-linear model
-    ripl.assume('hypers', """
-      (mem (lambda (k)
-        (scope_include
-          (quote hypers) k
-          (normal 0 10)
-        )
-      ))
-    """)
-
-    # the features will all be observed
-    #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
+    for k in range(num_features):
+      self.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
     
-    #ripl.assume('fold', """
+    # the features will all be observed
+    #self.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
+    
+    #self.assume('fold', """
     #  (lambda (op f len)
     #    (if (= len 1) (f 0)
     #      (op
@@ -71,20 +62,20 @@ class Model(object):
 
     # phi is the unnormalized probability of a bird moving
     # from cell i to cell j on day d
-    ripl.assume('phi', """
+    self.assume('phi', """
       (mem (lambda (y d i j)
         (let ((fs (lookup features (array y d i j))))
           (exp %s))))"""
-       % fold('+', '(* (hypers _k_) (lookup fs _k_))', '_k_', num_features))
+       % fold('+', '(* hypers_k_ (lookup fs _k_))', '_k_', num_features))
 
-    ripl.assume('get_bird_move_dist',
+    self.assume('get_bird_move_dist',
       '(mem (lambda (y d i) ' +
         fold('simplex', '(phi y d i j)', 'j', cells) +
       '))')
 
     # samples where a bird would move to from cell i on day d
     # the bird's id is used to identify the scope
-    ripl.assume('move', """
+    self.assume('move', """
       (lambda (y d i id)
         (scope_include (quote move) (array y d id)
         (scope_include y d
@@ -95,7 +86,7 @@ class Model(object):
       % fold('array', 'j', 'j', cells)
     )
 
-    ripl.assume('get_bird_pos', """
+    self.assume('get_bird_pos', """
       (mem (lambda (y d id)
         (if (= d 0) 0
           (move y (- d 1) (get_bird_pos y (- d 1) id) id)
@@ -103,58 +94,32 @@ class Model(object):
       ))
     """)
 
-    #ripl.assume('total_birds', total_birds)
+    #self.assume('total_birds', total_birds)
 
-    ripl.assume('count_birds', '(lambda (y d i) %s)' % fold('+', '(if (= (get_bird_pos y d id) i) 1 0)', 'id', total_birds))
+    self.assume('count_birds', '(lambda (y d i) %s)' % fold('+', '(if (= (get_bird_pos y d id) i) 1 0)', 'id', total_birds))
 
-    ripl.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.0001))))')
+    self.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.0001))))')
 
     self.loadFeatures()
+  
+  def makeObserves(self):
     self.loadObservations()
-    
-    print ripl.sivm.core_sivm.engine.get_entropy_info()
 
   def loadFeatures(self):
-    features_file = "release/%s-features.csv" % self.name
+    features_file = "release/%s-features.csv" % self.parameters["name"]
     features = readFeatures(features_file)
-    self.ripl.assume('features', toVenture(features))
-    
+    self.assume('features', toVenture(features))
 
   def loadObservations(self):
-    observations_file = "release/%s-observations.csv" % self.name
+    observations_file = "release/%s-observations.csv" % self.parameters["name"]
     observations = readObservations(observations_file)
 
-    for y in self.years:
+    for y in self.parameters["years"]:
       for (d, ns) in observations[y]:
-        if d not in self.days: continue
+        if d not in self.parameters["days"]: continue
         for i, n in enumerate(ns):
           print y, d, i
-          self.ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
+          self.observe('(observe_birds %d %d %d)' % (y, d, i), n)
     
-    self.ripl.infer('(incorporate)')
+    #self.ripl.infer('(incorporate)')
 
-  def getBirds(self, y, d):
-    return [self.ripl.sample('(count_birds %d %d %d)' % (y, d, i)) for i in range(self.cells)]
-
-  def printYear(self, y):
-    for d in self.days:
-      print self.getBirds(y, d)
-
-  def getBird(self, y, id):
-    return [self.ripl.sample('(get_bird_pos %d %d %d)' % (y, d, id)) for d in self.days]
-
-  def inferMove(self, n=1):
-    self.ripl.infer('(gibbs move one %d)' % n)
-
-  def inferPGibbs(self, p=10, n=1):
-    for y in self.years:
-      self.ripl.infer('(pgibbs %d ordered %d %d)' % (y, p, n))
-  
-  def inferHypers(self, n=1):
-    self.ripl.infer('(mh hypers one %d)' % n)
-  
-  def sampleHypers(self):
-    return [self.ripl.sample("(hypers %d)" % k) for k in range(num_features)]
-  
-  def likelihood(self):
-    return self.ripl.get_global_logscore()

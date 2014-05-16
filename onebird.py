@@ -1,5 +1,4 @@
 import venture.shortcuts as s
-
 ripl = s.make_puma_church_prime_ripl()
 
 from model import *
@@ -9,22 +8,25 @@ height = 4
 cells = width * height
 total_birds = 1
 
-Y = 3
+Y = 30
 D = 20
 
 years = range(Y)
 days = range(D)
 
-model = Model(ripl, "onebird", cells, total_birds, years, days)
-print "From prior: ", model.likelihood()
+parameters = {
+  "name":"onebird",
+  "cells":cells,
+  "total_birds":total_birds,
+  "years":years,
+  "days":days
+}
 
-model.inferMove(10 * Y * D)
-print "Gibbs on birds: ", model.likelihood()
+model = BirdsModel(ripl, parameters)
 
-def sweep():
-  model.inferMove(5 * Y)
-  model.inferHypers(20)
-  print model.likelihood()
+def sweep(r, *args):
+  r.infer('(gibbs move one %d)' % 5)
+  r.infer('(mh hypers one 4)')
 
-for i in range(200):
-  sweep()
+history, _ = model.runFromConditional(Y * D, runs=3, infer=sweep)
+history.save(directory = "onebird")
