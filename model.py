@@ -19,10 +19,8 @@ def loadObservations(ripl, name, years, days):
       for i, n in enumerate(ns):
         print y, d, i
         ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
-  
-  ripl.infer('(incorporate)')
 
-class OneBird:
+class OneBird(VentureUnit):
   @staticmethod
   def loadAssumes(ripl, name, cells):
     # we want to infer the hyperparameters of a log-linear model
@@ -71,24 +69,42 @@ class OneBird:
         (if (= (get_bird_pos y d) i)
           1 0))""")
 
-    ripl.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.0001))))')
+    ripl.assume('observe_birds', '(lambda (y d i) (poisson (+ (count_birds y d i) 0.0001)))')
 
   @staticmethod
   def loadObserves(ripl, name, years, days):
     observations_file = "release/%s-observations.csv" % name
     observations = readObservations(observations_file)
 
+    unconstrained = []
+
     for y in years:
       for (d, ns) in observations[y]:
         if d not in days: continue
         if d == 0: continue
         
+        loc = None
+        
         for i, n in enumerate(ns):
           if n > 0:
-            print y, d, i
-            ripl.observe('(get_bird_pos %d %d)' % (y, d), i)
-            ripl.infer('(incorporate)')
-
+            loc = i
+            break
+        
+        if loc is None:
+          unconstrained.append((y, d))
+          ripl.predict('(get_bird_pos %d %d)' % (y, d))
+        else:
+          ripl.observe('(observe_birds %d %d %d)' % (y, d, loc), 1)
+          ripl.infer({"kernel":"gibbs", "scope":"move", "block":(y, d-1), "transitions":1})
+    
+    return unconstrained
+  
+  def makeAssumes(self):
+    OneBird.loadAssumes(self, self.parameters["name"], self.parameters["cells"])
+  
+  def makeObserves(self):
+    loadObservations(self, self.parameters["name"], self.parameters["years"], self.parameters["days"])
+  
 class Continuous:
   @staticmethod
   def loadAssumes(ripl, name, cells, total_birds):
