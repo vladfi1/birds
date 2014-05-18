@@ -6,29 +6,36 @@ from model import *
 width = 4
 height = 4
 cells = width * height
-total_birds = 1
+name = "onebird"
 
-Y = 30
-D = 20
+Y = 2
+D = 10
 
 years = range(Y)
 days = range(D)
 
 parameters = {
-  "name":"onebird",
+  "name":name,
   "cells":cells,
-  "total_birds":total_birds,
   "years":years,
   "days":days
 }
 
-model = BirdsModel(ripl, parameters)
+OneBird.loadAssumes(ripl, name, cells)
+OneBird.loadObserves(ripl, name, years, days)
+
+#model = BirdsModel(ripl, parameters)
 
 def sweep(r, *args):
-  r.infer('(gibbs move one %d)' % 5)
-  r.infer('(mh hypers one 4)')
+  r.infer('(mh move one %d)' % 5)
+  #r.infer('(mh hypers one 4)')
 
+for i in range(10):
+  sweep(ripl)
+
+"""
 directory = "onebird"
 history, _ = model.runFromConditional(Y * D, runs=3, infer=sweep, verbose=True)
 history.save(directory = directory)
-history.plot('logscore', directory = directory)
+history.plotOneSeries('logscore', directory = directory)
+"""

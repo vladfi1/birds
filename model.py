@@ -4,122 +4,154 @@ from venture.unit import VentureUnit
 
 num_features = 4
 
-class BirdsModel(VentureUnit):
-  def makeAssumes(self):
-    name = self.parameters["name"]
-    cells = self.parameters["cells"]
-    total_birds = self.parameters["total_birds"]
-    
-    #ripl.assume('width', width)
-    #ripl.assume('height', height)
-    #ripl.assume('cells', cells)
+def loadFeatures(ripl, name):
+  features_file = "release/%s-features.csv" % name
+  features = readFeatures(features_file)
+  ripl.assume('features', toVenture(features))
 
-    #ripl.assume('square', '(lambda (x) (* x x))')
-    #ripl.assume('dist_max2', '18')
+def loadObservations(ripl, name, years, days):
+  observations_file = "release/%s-observations.csv" % name
+  observations = readObservations(observations_file)
 
-    #ripl.assume('cell2X', '(lambda (cell) (int_div cell height))')
-    #ripl.assume('cell2Y', '(lambda (cell) (int_mod cell height))')
-    #ripl.assume('cell2P', '(lambda (cell) (make_pair (cell2X cell) (cell2Y cell)))')
-    #ripl.assume('XY2cell', '(lambda (x y) (to_atom (+ (* height x) y)))')
+  for y in years:
+    for (d, ns) in observations[y]:
+      if d not in days: continue
+      for i, n in enumerate(ns):
+        print y, d, i
+        ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
+  
+  ripl.infer('(incorporate)')
 
-    #ripl.assume('dist2', """
-    #  (lambda (x1 y1 x2 y2)
-    #    (+ 
-    #      (square (- x1 x2))
-    #      (square (- y1 y2))
-    #    )
-    #  )
-    #""")
-
-    #ripl.assume('cell_dist2', """
-    #  (lambda (i j)
-    #    (dist2
-    #      (cell2X i) (cell2Y i)
-    #      (cell2X j) (cell2Y j)
-    #    )
-    #  )
-    #""")
-
-    #self.assume('num_features', num_features)
-
+class OneBird:
+  @staticmethod
+  def loadAssumes(ripl, name, cells):
     # we want to infer the hyperparameters of a log-linear model
     for k in range(num_features):
-      self.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
     
     # the features will all be observed
-    #self.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
-    
-    #self.assume('fold', """
-    #  (lambda (op f len)
-    #    (if (= len 1) (f 0)
-    #      (op
-    #        (f (- len 1))
-    #        (fold op f (- len 1))
-    #      )
-    #    )
-    #  )
-    #""")
+    #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
+    loadFeatures(ripl, name)
 
     # phi is the unnormalized probability of a bird moving
     # from cell i to cell j on day d
-    self.assume('phi', """
+    ripl.assume('phi', """
       (mem (lambda (y d i j)
         (let ((fs (lookup features (array y d i j))))
           (exp %s))))"""
        % fold('+', '(* hypers_k_ (lookup fs _k_))', '_k_', num_features))
 
-    self.assume('get_bird_move_dist',
+    ripl.assume('get_bird_move_dist',
       '(mem (lambda (y d i) ' +
         fold('simplex', '(phi y d i j)', 'j', cells) +
       '))')
     
-    self.assume('cell_array', fold('array', 'j', 'j', cells))
+    ripl.assume('cell_array', fold('array', 'j', 'j', cells))
     
     # samples where a bird would move to from cell i on day d
     # the bird's id is used to identify the scope
-    self.assume('move', """
-      (lambda (y d i id)
-        (scope_include (quote move) (array y d id)
-        (scope_include y d
+    ripl.assume('move', """
+      (lambda (y d i)
+        (scope_include (quote move) (array y d)
             (categorical
               (scope_exclude (quote move)
-              (scope_exclude y (get_bird_move_dist y d i)))
-              cell_array))))""")
+                (get_bird_move_dist y d i))
+              cell_array)))""")
 
-    self.assume('get_bird_pos', """
-      (mem (lambda (y d id)
+    ripl.assume('get_bird_pos', """
+      (mem (lambda (y d)
         (if (= d 0) 0
-          (move y (- d 1) (get_bird_pos y (- d 1) id) id)
+          (move y (- d 1) (get_bird_pos y (- d 1)))
         )
       ))
     """)
 
-    #self.assume('total_birds', total_birds)
+    ripl.assume('count_birds', """
+      (lambda (y d i)
+        (if (= (get_bird_pos y d) i)
+          1 0))""")
 
-    self.assume('count_birds', '(lambda (y d i) %s)' % fold('+', '(if (= (get_bird_pos y d id) i) 1 0)', 'id', total_birds))
+    ripl.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.0001))))')
 
-    self.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.0001))))')
-
-    self.loadFeatures()
-  
-  def makeObserves(self):
-    self.loadObservations()
-
-  def loadFeatures(self):
-    features_file = "release/%s-features.csv" % self.parameters["name"]
-    features = readFeatures(features_file)
-    self.assume('features', toVenture(features))
-
-  def loadObservations(self):
-    observations_file = "release/%s-observations.csv" % self.parameters["name"]
+  @staticmethod
+  def loadObserves(ripl, name, years, days):
+    observations_file = "release/%s-observations.csv" % name
     observations = readObservations(observations_file)
 
-    for y in self.parameters["years"]:
+    for y in years:
       for (d, ns) in observations[y]:
-        if d not in self.parameters["days"]: continue
+        if d not in days: continue
+        if d == 0: continue
+        
         for i, n in enumerate(ns):
-          print y, d, i
-          self.observe('(observe_birds %d %d %d)' % (y, d, i), n)
-    
-    #self.ripl.infer('(incorporate)')
+          if n > 0:
+            print y, d, i
+            ripl.observe('(get_bird_pos %d %d)' % (y, d), i)
+            ripl.infer('(incorporate)')
 
+class Continuous:
+  @staticmethod
+  def loadAssumes(ripl, name, cells, total_birds):
+    ripl.assume('total_birds', total_birds)
+    ripl.assume('cells', cells)
+
+    #ripl.assume('num_features', num_features)
+
+    # we want to infer the hyperparameters of a log-linear model
+    for k in range(num_features):
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
+    
+    # the features will all be observed
+    #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
+    loadFeatures(ripl, name)
+
+    # phi is the unnormalized probability of a bird moving
+    # from cell i to cell j on day d
+    ripl.assume('phi', """
+      (mem (lambda (y d i j)
+        (let ((fs (lookup features (array y d i j))))
+          (exp %s))))"""
+       % fold('+', '(* hypers_k_ (lookup fs _k_))', '_k_', num_features))
+
+    ripl.assume('get_bird_move_dist', """
+      (lambda (y d i)
+        (lambda (j)
+          (phi y d i j)))""")
+    
+    ripl.assume('foldl', """
+      (lambda (op x min max f)
+        (if (= min max) x
+          (foldl op (op x (f min)) (+ min 1) max f)))""")
+
+    ripl.assume('clamp_min', '(lambda (min x) (biplex (< x min) min x))')
+
+    ripl.assume('approx_binomial', """
+      (lambda (n p)
+        (clamp_min 0
+          (normal (* p n) (sqrt (* n (- p (* p p)))))))""")
+
+    ripl.assume('multinomial_func', """
+      (lambda (n min max f)
+        (let ((normalize (foldl + 0 min max f)))
+          (mem (lambda (i)
+            (approx_binomial n (/ (f i) normalize))))))""")    
+
+    ripl.assume('count_birds', """
+      (mem (lambda (y d i)
+        (if (= d 0)
+          (if (= i 0) total_birds 0)""" +
+          fold('+', '((bird_movements y (- d 1) j) i)', 'j', cells) + ')))')
+    
+    ripl.assume('bird_movements', """
+      (mem (lambda (y d i)
+        (multinomial_func (count_birds y d i) 0 cells (get_bird_move_dist y d i))))""")
+    
+    ripl.assume('get_birds_moving', """
+      (lambda (y d i j)
+        ((bird_movements y d i) j))""")
+
+    ripl.assume('observe_birds', '(mem (lambda (y d i) (poisson (+ (count_birds y d i) 0.0001))))')
+  
+  @staticmethod
+  def loadObserves(ripl, name, days, years):
+    loadObservations(ripl, name, days, years)
