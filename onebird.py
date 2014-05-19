@@ -27,7 +27,7 @@ onebird = OneBird(ripl, parameters)
 def sweep(r, *args):
   #for y, d in unconstrained:
   #  ripl.infer({"kernel":"gibbs", "scope":"move", "block":(y, d-1), "transitions":1})
-  r.infer('(gibbs move one %d)' % 5)
+  r.infer('(gibbs move one %d)' % 50)
   r.infer('(slice hypers one %d)' % num_features)
 
 d="slice"

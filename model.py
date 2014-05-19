@@ -179,7 +179,7 @@ class Continuous(VentureUnit):
     ripl.assume('get_birds_moving1', '(lambda (y d i) %s)' % fold('array', '(get_birds_moving y d i _j)', '_j', cells))
     ripl.assume('get_birds_moving2', '(lambda (y d) %s)' % fold('array', '(get_birds_moving1 y d _i)', '_i', cells))
     ripl.assume('get_birds_moving3', '(lambda (y) %s)' % fold('array', '(get_birds_moving2 y _d)', '_d', range(params["D"])))
-    ripl.assume('get_birds_moving4', fold('array', '(get_birds_moving3 _y)', '_y', range(params["Y"]))
+    ripl.assume('get_birds_moving4', fold('array', '(get_birds_moving3 _y)', '_y', range(params["Y"])))
   
   @staticmethod
   def loadObserves(ripl, name, years, days):
