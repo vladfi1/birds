@@ -9,7 +9,7 @@ height = 4
 cells = width * height
 name = "onebird"
 
-Y = 30
+Y = 3
 D = 20
 
 years = range(Y)
@@ -18,8 +18,8 @@ days = range(D)
 parameters = {
   "name":name,
   "cells":cells,
-  "years":years,
-  "days":days
+  "Y":Y,
+  "D":D
 }
 
 onebird = OneBird(ripl, parameters)
@@ -30,8 +30,7 @@ def sweep(r, *args):
   r.infer('(gibbs move one %d)' % 5)
   r.infer('(mh hypers one %d)' % num_features)
 
-directory = "onebird/"
 history, _ = onebird.runFromConditional(Y * D, runs=3, infer=sweep, verbose=True)
-history.save(directory = directory)
-history.plotOneSeries('logscore', directory = directory)
+history.save()
+history.plotOneSeries('logscore')
 

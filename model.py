@@ -72,7 +72,7 @@ class OneBird(VentureUnit):
     ripl.assume('observe_birds', '(lambda (y d i) (poisson (+ (count_birds y d i) 0.0001)))')
 
   @staticmethod
-  def loadObserves(ripl, name, years, days):
+  def loadObservations(ripl, name, years, days):
     observations_file = "release/%s-observations.csv" % name
     observations = readObservations(observations_file)
 
@@ -92,10 +92,9 @@ class OneBird(VentureUnit):
         
         if loc is None:
           unconstrained.append((y, d))
-          ripl.predict('(get_bird_pos %d %d)' % (y, d))
+          #ripl.predict('(get_bird_pos %d %d)' % (y, d))
         else:
-          ripl.observe('(observe_birds %d %d %d)' % (y, d, loc), 1)
-          ripl.infer({"kernel":"gibbs", "scope":"move", "block":(y, d-1), "transitions":1})
+          ripl.observe('(get_bird_pos %d %d)' % (y, d), loc)
     
     return unconstrained
   
@@ -103,7 +102,7 @@ class OneBird(VentureUnit):
     OneBird.loadAssumes(self, self.parameters["name"], self.parameters["cells"])
   
   def makeObserves(self):
-    loadObservations(self, self.parameters["name"], self.parameters["years"], self.parameters["days"])
+    OneBird.loadObservations(self, self.parameters["name"], range(self.parameters["Y"]), range(self.parameters["D"]))
   
 class Continuous:
   @staticmethod
