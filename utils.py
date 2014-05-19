@@ -89,3 +89,7 @@ def renderRIPL(dirpath="graphs/onebird",fmt="svg",colorIgnored = False):
     renderDot(dot,dirpath,i,fmt,colorIgnored)
     i += 1
 
+def avgFinalValue(history, name):
+  series = history.nameToSeries[name]
+  values = [s.values[-1] for s in series]
+  return sum(values)/len(values)
