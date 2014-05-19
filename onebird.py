@@ -28,9 +28,15 @@ def sweep(r, *args):
   #for y, d in unconstrained:
   #  ripl.infer({"kernel":"gibbs", "scope":"move", "block":(y, d-1), "transitions":1})
   r.infer('(gibbs move one %d)' % 5)
-  r.infer('(mh hypers one %d)' % num_features)
+  r.infer('(slice hypers one %d)' % num_features)
 
-history, _ = onebird.runFromConditional(Y * D, runs=3, infer=sweep, verbose=True)
-history.save()
-history.plotOneSeries('logscore')
+d="slice"
+#history, _ = onebird.runConditionedFromPrior(Y * D, runs=3, infer=sweep, verbose=True)
+history, _ = onebird.runFromConditional(Y * D / 6, runs=3, infer=sweep, verbose=True)
+
+hypers = [[history.nameToSeries['hypers%d' % k][r].values[-1] for k in range(4)] for r in range(3)]
+history.hypers = hypers
+
+history.save(directory=d)
+history.plotOneSeries('logscore', directory=d)
 
