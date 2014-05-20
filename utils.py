@@ -51,7 +51,7 @@ def readReconstruction(dataset):
   bird_moves = {}
   
   for row in csv[1:]:
-    bird_moves[(int(k)-1 for k in row[:4])] = float(row[4])
+    bird_moves[tuple(int(k)-1 for k in row[:4])] = float(row[4])
   
   return bird_moves
 
