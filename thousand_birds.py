@@ -35,7 +35,7 @@ thousand_birds = Continuous(ripl, parameters)
 #Continuous.loadObserves(ripl, name, years, days)
 
 def sweep(r, *args):
-  for y in years:
+  for y in range(Y):
     r.infer("(pgibbs %d ordered 2 1)" % y)
   r.infer("(mh default one %d)" % (5 * cells))
 
