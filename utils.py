@@ -36,6 +36,16 @@ def readObservations(filename):
   
   return years
 
+def readReconstruction(dataset, name):
+  csv = loadCSV("data/ground/dataset%d/%s-reconstruction-ground.csv" % (dataset, name))
+  
+  bird_moves = {}
+  
+  for row in csv[1:]:
+    bird_moves[(int(k)-1 for k in row[:4])] = float(row[4])
+  
+  return bird_moves
+
 def toVenture(thing):
   if isinstance(thing, dict):
     return s.val("dict", {k:toVenture(v) for k, v in thing.iteritems()})

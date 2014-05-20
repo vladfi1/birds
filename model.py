@@ -122,27 +122,35 @@ class OneBird(VentureUnit):
     self.loadObserves(ripl=self)
 
 class Continuous(VentureUnit):
-  @staticmethod
-  def loadAssumes(ripl, **params):
+
+  def __init__(self, ripl, params):
+    self.name = params['name']
+    self.cells = params['cells']
+    self.dataset = params['dataset']
+    self.total_birds = params['total_birds']
+    self.years = range(params['Y'])
+    self.days = range(params['D'])
+    self.hypers = params["hypers"]
+    super(Continuous, self).__init__(ripl, params)
+
+  def loadAssumes(self, ripl = None):
+    if ripl is None:
+      ripl = self.ripl
+    
     print "Loading assumes"
     
-    total_birds = params['total_birds']
-    cells = params["cells"]
-    hypers = params["hypers"]
-    name = params["name"]
-    
-    ripl.assume('total_birds', total_birds)
-    ripl.assume('cells', cells)
+    ripl.assume('total_birds', self.total_birds)
+    ripl.assume('cells', self.cells)
 
     #ripl.assume('num_features', num_features)
 
     # we want to infer the hyperparameters of a log-linear model
-    for k in range(num_features):
-      ripl.assume('hypers%d' % k,  hypers[k])
+    for k, b in enumerate(self.hypers):
+      ripl.assume('hypers%d' % k,  b)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
-    loadFeatures(ripl, name, range(params["Y"]), range(params["D"]))
+    loadFeatures(ripl, self.dataset, self.name, self.years, self.days)
 
     # phi is the unnormalized probability of a bird moving
     # from cell i to cell j on day d
@@ -179,7 +187,7 @@ class Continuous(VentureUnit):
       (mem (lambda (y d i)
         (if (= d 0)
           (if (= i 0) total_birds 0)""" +
-          fold('+', '(do_in_scope_1 y (- d 1) (bird_movements y (- d 1) _j) i)', '_j', cells) + ')))')
+          fold('+', '(do_in_scope_1 y (- d 1) (bird_movements y (- d 1) _j) i)', '_j', self.cells) + ')))')
     
     ripl.assume('bird_movements', """
       (mem (lambda (y d i)
@@ -200,19 +208,22 @@ class Continuous(VentureUnit):
     #ripl.assume('get_birds_moving3', '(lambda (y) %s)' % fold('array', '(get_birds_moving2 y _d)', '_d', params["D"]-1))
     #ripl.assume('get_birds_moving4', '(lambda () %s)' % fold('array', '(get_birds_moving3 _y)', '_y', params["Y"]))
   
-  @staticmethod
-  def loadObserves(ripl, **params):
+  def loadObserves(self, ripl = None):
+    if ripl is None:
+      ripl = self.ripl
+    
     print "Loading observations"
-    loadObservations(ripl, params["name"], range(params["Y"]), range(params["D"]))
+    loadObservations(ripl, self.dataset, self.name, self.years, self.days)
   
-  @staticmethod
-  def loadModel(ripl, **params):
-    Continuous.loadAssumes(ripl, **params)
-    Continuous.loadObserves(ripl, **params)
+  def loadModel(self, ripl = None):
+    if ripl is None:
+      ripl = self.ripl
+    self.loadAssumes(ripl)
+    self.loadObserves(ripl)
   
   def makeAssumes(self):
-    Continuous.loadAssumes(self, **self.parameters)
+    self.loadAssumes(ripl=self)
   
   def makeObserves(self):
-    Continuous.loadObserves(self, **self.parameters)
+    self.loadObserves(ripl=self)
 
