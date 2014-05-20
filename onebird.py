@@ -35,7 +35,7 @@ d="onebird-mh"
 #history, _ = onebird.runConditionedFromPrior(Y * D, runs=3, infer=sweep, verbose=True)
 history, _ = onebird.runFromConditional(Y * D, runs=runs, infer=sweep, verbose=True)
 
-hypers = [avgFinalValue(h, 'hypers%d' % k) for k in range(num_features)]
+hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
 history.hypers = hypers
 
 history.save(directory=d)
