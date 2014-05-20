@@ -4,6 +4,8 @@ ripl = s.make_puma_church_prime_ripl()
 from model import *
 from venture.unit import VentureUnit
 
+from utils import avgFinalValue
+
 width = 4
 height = 4
 cells = width * height
@@ -38,5 +40,5 @@ hypers = [[history.nameToSeries['hypers%d' % k][r].values[-1] for k in range(4)]
 history.hypers = hypers
 
 history.save(directory=d)
-history.plotOneSeries('logscore', directory=d)
-
+#history.plotOneSeries('logscore', directory=d)
+print [avgFinalValue(h, 'hypers%d' % k) for k in range(num_features)]
