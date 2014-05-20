@@ -1,4 +1,5 @@
 import venture.shortcuts as s
+import numpy as np
 
 def parseLine(line):
   return line.strip().split(',')
@@ -92,4 +93,5 @@ def renderRIPL(dirpath="graphs/onebird",fmt="svg",colorIgnored = False):
 def avgFinalValue(history, name):
   series = history.nameToSeries[name]
   values = [s.values[-1] for s in series]
-  return sum(values)/len(values)
+  return np.average(values)
+
