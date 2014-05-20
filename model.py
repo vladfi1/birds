@@ -4,9 +4,14 @@ from venture.unit import VentureUnit
 
 num_features = 4
 
-def loadFeatures(ripl, name):
+def loadFeatures(ripl, name, years, days):
   features_file = "release/%s-features.csv" % name
   features = readFeatures(features_file)
+  
+  for (y, d, i, j) in features.keys():
+    if y not in years or d not in days:
+      del features[(y, d, i, j)]
+  
   ripl.assume('features', toVenture(features))
 
 def loadObservations(ripl, name, years, days):
@@ -107,6 +112,8 @@ class OneBird(VentureUnit):
 class Continuous(VentureUnit):
   @staticmethod
   def loadAssumes(ripl, **params):
+    print "Loading assumes"
+    
     total_birds = params['total_birds']
     cells = params["cells"]
     hypers = params["hypers"]
@@ -123,7 +130,7 @@ class Continuous(VentureUnit):
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
-    loadFeatures(ripl, name)
+    loadFeatures(ripl, name, range(params["Y"]), range(params["D"]))
 
     # phi is the unnormalized probability of a bird moving
     # from cell i to cell j on day d
@@ -160,7 +167,7 @@ class Continuous(VentureUnit):
       (mem (lambda (y d i)
         (if (= d 0)
           (if (= i 0) total_birds 0)""" +
-          fold('+', '(do_in_scope_1 y d (bird_movements y (- d 1) _j) i)', '_j', cells) + ')))')
+          fold('+', '(do_in_scope_1 y (- d 1) (bird_movements y (- d 1) _j) i)', '_j', cells) + ')))')
     
     ripl.assume('bird_movements', """
       (mem (lambda (y d i)
@@ -176,13 +183,14 @@ class Continuous(VentureUnit):
       (lambda (y d i j)
         ((bird_movements y d i) j))""")
     
-    ripl.assume('get_birds_moving1', '(lambda (y d i) %s)' % fold('array', '(get_birds_moving y d i _j)', '_j', cells))
-    ripl.assume('get_birds_moving2', '(lambda (y d) %s)' % fold('array', '(get_birds_moving1 y d _i)', '_i', cells))
-    ripl.assume('get_birds_moving3', '(lambda (y) %s)' % fold('array', '(get_birds_moving2 y _d)', '_d', params["D"]-1))
-    ripl.assume('get_birds_moving4', '(lambda () %s)' % fold('array', '(get_birds_moving3 _y)', '_y', params["Y"]))
+    #ripl.assume('get_birds_moving1', '(lambda (y d i) %s)' % fold('array', '(get_birds_moving y d i _j)', '_j', cells))
+    #ripl.assume('get_birds_moving2', '(lambda (y d) %s)' % fold('array', '(get_birds_moving1 y d _i)', '_i', cells))
+    #ripl.assume('get_birds_moving3', '(lambda (y) %s)' % fold('array', '(get_birds_moving2 y _d)', '_d', params["D"]-1))
+    #ripl.assume('get_birds_moving4', '(lambda () %s)' % fold('array', '(get_birds_moving3 _y)', '_y', params["Y"]))
   
   @staticmethod
   def loadObserves(ripl, **params):
+    print "Loading observations"
     loadObservations(ripl, params["name"], range(params["Y"]), range(params["D"]))
   
   @staticmethod
