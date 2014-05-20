@@ -1,3 +1,5 @@
+import time
+
 import venture.shortcuts as s
 ripl = s.make_puma_church_prime_ripl()
 
@@ -73,11 +75,18 @@ p = multiprocessing.cpu_count() / 2
 print "Using %d particles" % p
 
 def sweep(r, *args):
+  t0 = time.time()
   for y in range(Y):
     r.infer("(pgibbs %d ordered %d 1)" % (y, p))
+  
+  t1 = time.time()
   #for y in range(Y):
     #r.infer("(mh %d one %d)" % (y, 1))
   r.infer("(mh default one %d)" % (cells ** 2))
+  
+  t2 = time.time()
+  
+  print "pgibbs: %f, mh: %f" % (t1-t0, t2-t1)
 
 def computeScore():
   infer_bird_moves = getBirdMoves()
@@ -85,8 +94,7 @@ def computeScore():
   score = 0
   
   for key in infer_bird_moves:
-    if key in ground:
-      score += (infer_bird_moves[key] - ground[key]) ** 2
+    score += (infer_bird_moves[key] - ground[key]) ** 2
 
   return score
 
