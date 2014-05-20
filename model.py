@@ -187,7 +187,7 @@ class Continuous(VentureUnit):
       (mem (lambda (y d i)
         (if (= d 0)
           (if (= i 0) total_birds 0)""" +
-          fold('+', '(do_in_scope_1 y (- d 1) (bird_movements y (- d 1) _j) i)', '_j', self.cells) + ')))')
+          tree('+', '(do_in_scope_1 y (- d 1) (bird_movements y (- d 1) _j) i)', '_j', 0, self.cells) + ')))')
     
     ripl.assume('bird_movements', """
       (mem (lambda (y d i)

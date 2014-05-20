@@ -85,6 +85,13 @@ def listToExpr(list):
 def fold(op, exp, counter, length):
   return '(' + op + " " + " ".join([exp.replace(counter, str(i)) for i in range(length)]) + ')'
 
+def tree(op, exp, counter, lower, upper):
+  average = (lower + upper) / 2
+  if average == lower:
+    return exp.replace(counter, str(lower))
+  else:
+    return '(' + op + " " + tree(op, exp, counter, lower, average) + ' ' + tree(op, exp, counter, average, upper) + ')'
+
 from subprocess import call
 
 def renderDot(dot,dirpath,i,fmt,colorIgnored):
