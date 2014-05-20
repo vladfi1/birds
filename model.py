@@ -178,16 +178,21 @@ class Continuous(VentureUnit):
     
     ripl.assume('get_birds_moving1', '(lambda (y d i) %s)' % fold('array', '(get_birds_moving y d i _j)', '_j', cells))
     ripl.assume('get_birds_moving2', '(lambda (y d) %s)' % fold('array', '(get_birds_moving1 y d _i)', '_i', cells))
-    ripl.assume('get_birds_moving3', '(lambda (y) %s)' % fold('array', '(get_birds_moving2 y _d)', '_d', params["D"]))
-    ripl.assume('get_birds_moving4', fold('array', '(get_birds_moving3 _y)', '_y', params["Y"]))
+    ripl.assume('get_birds_moving3', '(lambda (y) %s)' % fold('array', '(get_birds_moving2 y _d)', '_d', params["D"]-1))
+    ripl.assume('get_birds_moving4', '(lambda () %s)' % fold('array', '(get_birds_moving3 _y)', '_y', params["Y"]))
   
   @staticmethod
-  def loadObserves(ripl, name, years, days):
-    loadObservations(ripl, name, years, days)
+  def loadObserves(ripl, **params):
+    loadObservations(ripl, params["name"], range(params["Y"]), range(params["D"]))
+  
+  @staticmethod
+  def loadModel(ripl, **params):
+    Continuous.loadAssumes(ripl, **params)
+    Continuous.loadObserves(ripl, **params)
   
   def makeAssumes(self):
     Continuous.loadAssumes(self, **self.parameters)
   
   def makeObserves(self):
-    Continuous.loadObserves(self, self.parameters["name"], range(self.parameters["Y"]), range(self.parameters["D"]))
+    Continuous.loadObserves(self, **self.parameters)
 
