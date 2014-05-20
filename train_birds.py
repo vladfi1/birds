@@ -65,7 +65,7 @@ def getBirdMoves():
 #observes = loadFromPrior()
 #true_bird_moves = getBirdMoves()
 
-ground = readReconstruction(dataset, name)
+ground = readReconstruction(dataset)
 
 import multiprocessing
 p = multiprocessing.cpu_count() / 2

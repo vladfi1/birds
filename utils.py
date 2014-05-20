@@ -1,5 +1,6 @@
 import venture.shortcuts as s
 import numpy as np
+import os
 
 def parseLine(line):
   return line.strip().split(',')
@@ -36,8 +37,16 @@ def readObservations(filename):
   
   return years
 
-def readReconstruction(dataset, name):
-  csv = loadCSV("data/ground/dataset%d/%s-reconstruction-ground.csv" % (dataset, name))
+def readReconstruction(dataset):
+  path = "data/ground/dataset%d/" % dataset
+
+  filename = None
+  for f in os.listdir(path):
+    if 'reconstruction' in f:
+      filename = path + f
+      break
+
+  csv = loadCSV(filename)
   
   bird_moves = {}
   
