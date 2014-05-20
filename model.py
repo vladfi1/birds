@@ -4,8 +4,8 @@ from venture.unit import VentureUnit
 
 num_features = 4
 
-def loadFeatures(ripl, name, years, days):
-  features_file = "release/%s-features.csv" % name
+def loadFeatures(ripl, dataset, name, years, days):
+  features_file = "data/input/dataset%d/%s-features.csv" % (dataset, name)
   features = readFeatures(features_file)
   
   for (y, d, i, j) in features.keys():
@@ -14,8 +14,8 @@ def loadFeatures(ripl, name, years, days):
   
   ripl.assume('features', toVenture(features))
 
-def loadObservations(ripl, name, years, days):
-  observations_file = "release/%s-observations.csv" % name
+def loadObservations(ripl, dataset, name, years, days):
+  observations_file = "data/input/dataset%d/%s-observations.csv" % (dataset, name)
   observations = readObservations(observations_file)
 
   for y in years:
@@ -26,15 +26,25 @@ def loadObservations(ripl, name, years, days):
         ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
 
 class OneBird(VentureUnit):
-  @staticmethod
-  def loadAssumes(ripl, name, cells):
+  
+  def __init__(self, ripl, params):
+    self.name = params['name']
+    self.cells = params['cells']
+    self.years = range(params['Y'])
+    self.days = range(params['D'])
+    super(OneBird, self).__init__(ripl, params)
+  
+  def loadAssumes(self, ripl = None):
+    if ripl is None:
+      ripl = self.ripl
+    
     # we want to infer the hyperparameters of a log-linear model
     for k in range(num_features):
       ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
-    loadFeatures(ripl, name)
+    loadFeatures(ripl, 1, self.name, self.years, self.days)
 
     # phi is the unnormalized probability of a bird moving
     # from cell i to cell j on day d
@@ -46,10 +56,10 @@ class OneBird(VentureUnit):
 
     ripl.assume('get_bird_move_dist',
       '(mem (lambda (y d i) ' +
-        fold('simplex', '(phi y d i j)', 'j', cells) +
+        fold('simplex', '(phi y d i j)', 'j', self.cells) +
       '))')
     
-    ripl.assume('cell_array', fold('array', 'j', 'j', cells))
+    ripl.assume('cell_array', fold('array', 'j', 'j', self.cells))
     
     # samples where a bird would move to from cell i on day d
     # the bird's id is used to identify the scope
@@ -76,16 +86,18 @@ class OneBird(VentureUnit):
 
     ripl.assume('observe_birds', '(lambda (y d i) (poisson (+ (count_birds y d i) 0.0001)))')
 
-  @staticmethod
-  def loadObserves(ripl, name, years, days):
-    observations_file = "release/%s-observations.csv" % name
+  def loadObserves(self, ripl = None):
+    if ripl is None:
+      ripl = self.ripl
+  
+    observations_file = "data/input/dataset%d/%s-observations.csv" % (1, self.name)
     observations = readObservations(observations_file)
 
     unconstrained = []
 
-    for y in years:
+    for y in self.years:
       for (d, ns) in observations[y]:
-        if d not in days: continue
+        if d not in self.days: continue
         if d == 0: continue
         
         loc = None
@@ -104,11 +116,11 @@ class OneBird(VentureUnit):
     return unconstrained
   
   def makeAssumes(self):
-    OneBird.loadAssumes(self, self.parameters["name"], self.parameters["cells"])
+    self.loadAssumes(ripl=self)
   
   def makeObserves(self):
-    OneBird.loadObserves(self, self.parameters["name"], range(self.parameters["Y"]), range(self.parameters["D"]))
-  
+    self.loadObserves(ripl=self)
+
 class Continuous(VentureUnit):
   @staticmethod
   def loadAssumes(ripl, **params):
