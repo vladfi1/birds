@@ -14,11 +14,11 @@ width = 10
 height = 10
 cells = width * height
 
-total_birds = 1000
-name = "%dx%dx%d-test" % (width, height, total_birds)
 dataset = 2
+total_birds = 1000 if dataset == 2 else 1000000
+name = "%dx%dx%d-test" % (width, height, total_birds)
 Y = 1
-D = 2
+D = 3
 
 runs = 1
 
@@ -51,7 +51,7 @@ def loadFromPrior():
   return observes
 
 def getBirdMoves():
-  print "Sampling bird movements"
+  #print "Sampling bird movements"
   
   #return ripl.sample('(get_birds_moving4)')
   bird_moves = {}
@@ -82,7 +82,7 @@ def sweep(r, *args):
   t1 = time.time()
   #for y in range(Y):
     #r.infer("(mh %d one %d)" % (y, 1))
-  r.infer("(mh default one %d)" % (cells ** 2))
+  r.infer("(mh default one %d)" % 1000)
   
   t2 = time.time()
   
@@ -108,9 +108,19 @@ def run():
   #for (y, d, i, n) in observes:
   #  ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
 
+  print "Score: ", computeScore()
+  print "pgibbs with %d particles" % p
+  for y in range(Y):
+    ripl.infer("(pgibbs %d ordered %d 1)" % (y, p))
+  
+  print "Score: ", computeScore()
+  
+  print "Starting mh sweeps"
+  
   for i in range(Y * D):
-    print "Inference step %d" % i
+    #print "MH step %d" % i
     sweep(ripl)
-    print computeScore()
+    #ripl.infer("(mh default one %d)" % 1000)
+    print "Score: ", computeScore()
 
 run()
