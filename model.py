@@ -1,6 +1,7 @@
 import venture.shortcuts as s
 from utils import *
 from venture.unit import VentureUnit
+from venture.ripl.ripl import _strip_types
 
 num_features = 4
 
@@ -131,6 +132,8 @@ class Continuous(VentureUnit):
     self.years = range(params['Y'])
     self.days = range(params['D'])
     self.hypers = params["hypers"]
+    self.ground = readReconstruction(self.dataset)
+
     super(Continuous, self).__init__(ripl, params)
 
   def loadAssumes(self, ripl = None):
@@ -181,7 +184,7 @@ class Continuous(VentureUnit):
       (lambda (n min max f)
         (let ((normalize (foldl + 0 min max f)))
           (mem (lambda (i)
-            (approx_binomial n (/ (f i) normalize))))))""")    
+            (poisson (* n (/ (f i) normalize)))))))""")
 
     ripl.assume('count_birds', """
       (mem (lambda (y d i)
@@ -226,4 +229,28 @@ class Continuous(VentureUnit):
   
   def makeObserves(self):
     self.loadObserves(ripl=self)
+  
+  def getBirdMoves(self):
+  #print "Sampling bird movements"
+  
+  #return ripl.sample('(get_birds_moving4)')
+    bird_moves = {}
+    
+    for y in self.years:
+      for d in self.days[:-1]:
+        for i in range(self.cells):
+          for j in range(self.cells):
+            bird_moves[(y, d, i, j)] = _strip_types(self.ripl.sivm.sample(['get_birds_moving'] + map(s.number, [y, d, i, j]))['value'])
+    
+    return bird_moves
+  
+  def computeScore(self):
+    infer_bird_moves = self.getBirdMoves()
+
+    score = 0
+    
+    for key in infer_bird_moves:
+      score += (infer_bird_moves[key] - self.ground[key]) ** 2
+
+    return score
 
