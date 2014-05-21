@@ -172,10 +172,10 @@ class Continuous(VentureUnit):
 
     ripl.assume('clamp_min', '(lambda (min x) (biplex (< x min) min x))')
 
-    ripl.assume('approx_binomial', """
-      (lambda (n p)
-        (clamp_min 0
-          (normal (* p n) (sqrt (* n (- p (* p p)))))))""")
+    #ripl.assume('approx_binomial', """
+    #  (lambda (n p)
+    #    (clamp_min 0
+     #     (normal (* p n) (sqrt (* n (- p (* p p)))))))""")
 
     ripl.assume('multinomial_func', """
       (lambda (n min max f)
