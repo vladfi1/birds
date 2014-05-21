@@ -70,7 +70,8 @@ def getBirdMoves():
 ground = readReconstruction(dataset)
 
 import multiprocessing
-p = multiprocessing.cpu_count() / 2
+#p = multiprocessing.cpu_count() / 2
+p = 2
 
 print "Using %d particles" % p
 
@@ -119,8 +120,8 @@ def run():
   
   for i in range(Y * D):
     #print "MH step %d" % i
-    sweep(ripl)
-    #ripl.infer("(mh default one %d)" % 1000)
+    #sweep(ripl)
+    ripl.infer("(mh default one %d)" % 1000)
     print "Score: ", computeScore()
 
 run()
