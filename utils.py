@@ -32,7 +32,7 @@ def readObservations(filename):
   
   for row in csv[1:]:
     [year, day] = map(int, row[:2])
-    cells = map(int, row[2:])
+    cells = map(float, row[2:])
     update(years, year-1, (day-1, cells))
   
   return years
