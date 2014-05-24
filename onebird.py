@@ -33,7 +33,7 @@ def run(y):
   onebird = OneBird(ripl, params)
   history, _ = onebird.runFromConditional(D, runs=runs, infer=sweep, verbose=True)
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
-  history.save(directory="%s-%d" % (name, y))
+  history.save(directory="%s/%d" % (name, y))
 
 from multiprocessing import Process
 
@@ -50,7 +50,7 @@ histories = []
 
 for y in range(Y):
   processes[y].join()
-  with open("%s-%d/run_from_conditional" % (name, y)) as f:
+  with open("%s/%d/run_from_conditional" % (name, y)) as f:
     histories.append(pickle.load(f))
 
 import numpy as np
