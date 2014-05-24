@@ -99,11 +99,11 @@ def run(pgibbs=True):
     cont.updateObserves(d)
     log()
     
-    for i in range(10):
+    for i in range(1):
       ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y * cells ** 2})
       log()
-  
-  #writeReconstruction(params, cont.getBirdMoves())
+    
+  writeReconstruction(params, cont.getBirdMoves())
   
   return logs
 

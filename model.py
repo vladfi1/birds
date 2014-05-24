@@ -205,6 +205,7 @@ class Continuous(VentureUnit):
     ripl.assume('get_birds_moving1', '(lambda (y d i) %s)' % fold('array', '(get_birds_moving y d i __j)', '__j', self.cells))
     ripl.assume('get_birds_moving2', '(lambda (y d) %s)' % fold('array', '(get_birds_moving1 y d __i)', '__i', self.cells))
     ripl.assume('get_birds_moving3', '(lambda (d) %s)' % fold('array', '(get_birds_moving2 __y d)', '__y', len(self.years)))
+    ripl.assume('get_birds_moving4', '(lambda () %s)' % fold('array', '(get_birds_moving3 __d)', '__d', len(self.days)-1))
   
   def loadObserves(self, ripl = None):
     if ripl is None:
@@ -234,20 +235,7 @@ class Continuous(VentureUnit):
     #self.ripl.predict(fold('array', '(get_birds_moving3 __d)', '__d', len(self.days)-1), label='bird_moves')
   
   def getBirdMoves(self):
-    #print "Sampling bird movements"
-    
-    bird_moves_raw = self.ripl.report('bird_moves')
-    #return ripl.sample('(get_birds_moving4)')
-    
-    bird_moves = {}
-    
-    for d in self.days[:-1]:
-      for y in self.years:
-        for i in range(self.cells):
-          for j in range(self.cells):
-            bird_moves[(y, d, i, j)] = bird_moves_raw[d][y][i][j]
-    
-    return bird_moves
+    return self.ripl.sample('(get_birds_moving4)')
   
   def computeScoreDay(self, d):
     bird_moves = self.ripl.sample('(get_birds_moving3 %d)' % d)
