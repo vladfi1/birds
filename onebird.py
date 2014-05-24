@@ -1,8 +1,10 @@
 import venture.shortcuts as s
-from model import *
 from venture.unit import VentureUnit
 
+from model import *
 from utils import avgFinalValue
+
+import math
 
 name = "onebird"
 width = 4
@@ -17,8 +19,8 @@ runs=1
 def sweep(r, *args):
   #for y, d in unconstrained:
   #  ripl.infer({"kernel":"gibbs", "scope":"move", "block":(y, d-1), "transitions":1})
-  r.infer('(gibbs move one %d)' % (D / 5))
-  r.infer('(mh hypers one %d)' % num_features)
+  r.infer('(gibbs move one %d)' % (D / math.e))
+  r.infer('(slice hypers one %d)' % num_features)
 
 def run(y):
   ripl = s.make_puma_church_prime_ripl()
