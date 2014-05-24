@@ -4,8 +4,7 @@ import venture.shortcuts as s
 ripl = s.make_puma_church_prime_ripl()
 
 from utils import *
-import model
-from model import Continuous
+from model import Poisson
 
 num_features = 4
 
@@ -26,18 +25,20 @@ hypers = [5, 10, 10, 10]
 
 params = {
   "name":name,
+  "width":width,
+  "height":height,
   "cells":cells,
   "dataset":dataset,
   "total_birds":total_birds,
-  "Y":Y,
-  "D":0,
+  "years":range(Y),
+  "days":[0],
   "hypers":hypers,
 }
 
-cont = Continuous(ripl, params)
+model = Poisson(ripl, params)
 
 def loadFromPrior():
-  cont.loadAssumes()
+  model.loadAssumes()
 
   print "Predicting observes"
   observes = []
@@ -75,10 +76,10 @@ def sweep(r, *args):
 def run(pgibbs=True):
   print "Starting run"
   ripl.clear()
-  cont.loadAssumes()
-  cont.updateObserves(0)
+  model.loadAssumes()
+  model.updateObserves(0)
 
-  #cont.loadObserves()
+  #model.loadObserves()
   #ripl.infer('(incorporate)')
   
   #print "Loading observations"
@@ -90,21 +91,26 @@ def run(pgibbs=True):
   
   def log():
     dt = time.time() - t[0]
-    logs.append((ripl.get_global_logscore(), cont.computeScoreDay(cont.days[-2]), dt))
+    logs.append((ripl.get_global_logscore(), model.computeScoreDay(model.days[-2]), dt))
     print logs[-1]
     t[0] += dt
   
   for d in range(1, D):
     print "Day %d" % d
-    cont.updateObserves(d)
+    model.updateObserves(d)
     log()
     
     for i in range(1):
       ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y * cells ** 2})
       log()
     
-  writeReconstruction(params, cont.getBirdMoves())
+  writeReconstruction(params, model.getBirdMoves())
+  
+  drawBirdMoves(params, model.getBirdMoves(), 'temp')
   
   return logs
 
-history = run()
+history = None
+if __name__ == "__main__":
+  history = run()
+

@@ -45,7 +45,7 @@ class OneBird(VentureUnit):
 
     # we want to infer the hyperparameters of a log-linear model
     for k in range(num_features):
-      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 100))' % k)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
@@ -123,19 +123,19 @@ class OneBird(VentureUnit):
   def makeObserves(self):
     self.loadObserves(ripl=self)
 
-class Continuous(VentureUnit):
+class Poisson(VentureUnit):
 
   def __init__(self, ripl, params):
     self.name = params['name']
     self.cells = params['cells']
     self.dataset = params['dataset']
     self.total_birds = params['total_birds']
-    self.years = range(params['Y'])
-    self.days = range(params['D'])
+    self.years = params['years']
+    self.days = params['days']
     self.hypers = params["hypers"]
     self.ground = readReconstruction(params)
     self.features = loadFeatures(self.dataset, self.name, self.years, self.days)
-    super(Continuous, self).__init__(ripl, params)
+    super(Poisson, self).__init__(ripl, params)
 
   def loadAssumes(self, ripl = None):
     if ripl is None:
@@ -233,6 +233,15 @@ class Continuous(VentureUnit):
     loadObservations(self.ripl, self.dataset, self.name, self.years, [d])
     self.ripl.infer('(incorporate)')
     #self.ripl.predict(fold('array', '(get_birds_moving3 __d)', '__d', len(self.days)-1), label='bird_moves')
+  
+  def getBirdLocations(self):
+    bird_locations = {}
+    for y in self.years:
+      bird_locations[y] = {}
+      for d in self.days:
+        bird_locations[y][d] = [ripl.sample('(count_birds %d %d %d)' % (y, d, i)) for i in range(self.cells)]
+    
+    return bird_locations
   
   def getBirdMoves(self):
     return self.ripl.sample('(get_birds_moving4)')
