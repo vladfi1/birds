@@ -1,5 +1,6 @@
 import venture.shortcuts as s
 import numpy as np
+from scipy import misc
 import os
 
 def parseLine(line):
@@ -55,6 +56,52 @@ def writeReconstruction(params, bird_moves):
     for key, value in sorted(bird_moves.items()):
       f.write(','.join(map(str, [k+1 for k  in key] + [value])))
       f.write('\n')
+
+def ensure(path):
+  if not os.path.exists(path):
+    os.makedirs(path)
+
+def drawBirds(params, bird_locs, filename):
+  width = params['width']
+  height = params['height']
+  
+  bitmap = np.ndarray(shape=(width, height))
+  
+  #import pdb; pdb.set_trace()
+  
+  for x in range(width):
+    for y in range(height):
+      bitmap[x, y] = bird_locs[x * height + y]
+  
+  print "Saving images to %s" % filename
+  misc.imsave(filename, bitmap)
+
+def drawBirdMoves(params, bird_moves, path):
+  index = 0
+  
+  cells = params['cells']
+  
+  bird_locs = [0] * cells
+  bird_locs[0] = params['total_birds']
+  
+  for y in params['years']:
+    for d in params['days'][:-1]:
+      for i in range(cells):
+        for j in range(cells):
+          move = bird_moves[(y, d, i, j)]
+          bird_locs[i] -= move
+          bird_locs[j] += move
+      
+      p = path + '/%d' % y
+      ensure(p)
+      filename = p + '/%02d.png' % (d+1)
+      drawBirds(params, bird_locs, filename)
+
+def testDrawBirdMoves():
+  from train_birds import model, params
+  params['days'] = range(20)
+  
+  drawBirdMoves(params, model.ground, 'test')
 
 def toVenture(thing):
   if isinstance(thing, dict):
