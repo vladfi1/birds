@@ -7,6 +7,7 @@ num_features = 4
 
 def loadFeatures(dataset, name, years, days):
   features_file = "data/input/dataset%d/%s-features.csv" % (dataset, name)
+  print "Loading features from %s" % features_file
   features = readFeatures(features_file)
   
   for (y, d, i, j) in features.keys():
@@ -40,6 +41,8 @@ class OneBird(VentureUnit):
     if ripl is None:
       ripl = self.ripl
     
+    print "Loading assumes"
+
     # we want to infer the hyperparameters of a log-linear model
     for k in range(num_features):
       ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
