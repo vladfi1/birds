@@ -4,6 +4,7 @@ import venture.shortcuts as s
 ripl = s.make_puma_church_prime_ripl()
 
 from utils import *
+import model
 from model import Continuous
 
 num_features = 4
@@ -29,7 +30,7 @@ params = {
   "dataset":dataset,
   "total_birds":total_birds,
   "Y":Y,
-  "D":D,
+  "D":0,
   "hypers":hypers,
 }
 
@@ -71,37 +72,38 @@ def sweep(r, *args):
   
   print "pgibbs: %f, mh: %f" % (t1-t0, t2-t1)
 
-def run():
+def run(pgibbs=True):
   print "Starting run"
   ripl.clear()
   cont.loadAssumes()
-  cont.loadObserves()
+  cont.updateObserves(0)
+
+  #cont.loadObserves()
+  #ripl.infer('(incorporate)')
   
   #print "Loading observations"
   #for (y, d, i, n) in observes:
   #  ripl.observe('(observe_birds %d %d %d)' % (y, d, i), n)
   
   logs = []
+  t = [time.time()] # python :(
   
   def log():
-    logs.append((ripl.get_global_logscore(), cont.computeScore()))
+    dt = time.time() - t[0]
+    logs.append((ripl.get_global_logscore(), cont.computeScoreDay(cont.days[-2]), dt))
     print logs[-1]
+    t[0] += dt
   
-  log()
-  
-  print "pgibbs with %d particles" % p
-  for y in range(Y):
-    ripl.infer("(pgibbs %d ordered %d 1)" % (y, p))
-  
-  log()
-  
-  print "Starting mh sweeps"
-  
-  for i in range(Y * D * 10):
-    #print "MH step %d" % i
-    #sweep(ripl)
-    ripl.infer("(mh default one %d)" % 1000)
+  for d in range(1, D):
+    print "Day %d" % d
+    cont.updateObserves(d)
     log()
+    
+    for i in range(10):
+      ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y * cells ** 2})
+      log()
+  
+  #writeReconstruction(params, cont.getBirdMoves())
   
   return logs
 

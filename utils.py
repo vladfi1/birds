@@ -37,15 +37,8 @@ def readObservations(filename):
   
   return years
 
-def readReconstruction(dataset):
-  path = "data/ground/dataset%d/" % dataset
-
-  filename = None
-  for f in os.listdir(path):
-    if 'reconstruction' in f:
-      filename = path + f
-      break
-
+def readReconstruction(params):
+  filename = "data/ground/dataset%d/10x10x%d-reconstruction-ground.csv" % (params["dataset"], params["total_birds"])
   csv = loadCSV(filename)
   
   bird_moves = {}
@@ -54,6 +47,14 @@ def readReconstruction(dataset):
     bird_moves[tuple(int(k)-1 for k in row[:4])] = float(row[4])
   
   return bird_moves
+
+def writeReconstruction(params, bird_moves):
+  filename = "data/output/dataset%d/10x10x%d-reconstruction-ground.csv" % (params["dataset"], params["total_birds"])
+  
+  with open(filename, 'w') as f:
+    for key, value in sorted(bird_moves.items()):
+      f.write(','.join(map(str, [k+1 for k  in key] + [value])))
+      f.write('\n')
 
 def toVenture(thing):
   if isinstance(thing, dict):
