@@ -244,7 +244,17 @@ class Poisson(VentureUnit):
     return bird_locations
   
   def getBirdMoves(self):
-    return self.ripl.sample('(get_birds_moving4)')
+    
+    bird_moves = {}
+    
+    for d in self.days:
+      bird_moves_raw = self.ripl.sample('(get_birds_moving3 %d)' % d)
+      for y in self.years:
+        for i in range(self.cells):
+          for j in range(self.cells):
+            bird_moves[(y, d, i, j)] = bird_moves_raw[y][i][j]
+    
+    return bird_moves
   
   def computeScoreDay(self, d):
     bird_moves = self.ripl.sample('(get_birds_moving3 %d)' % d)

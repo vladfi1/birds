@@ -100,13 +100,12 @@ def run(pgibbs=True):
     model.updateObserves(d)
     log()
     
-    for i in range(1):
+    for i in range(0):
       ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y * cells ** 2})
       log()
-    
-  writeReconstruction(params, model.getBirdMoves())
   
-  drawBirdMoves(params, model.getBirdMoves(), 'temp')
+  params['days'] = range(D)
+  drawBirdMoves(params, model.getBirdMoves(), 'bird_moves')
   
   return logs
 

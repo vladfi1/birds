@@ -80,11 +80,12 @@ def drawBirdMoves(params, bird_moves, path):
   index = 0
   
   cells = params['cells']
-  
-  bird_locs = [0] * cells
-  bird_locs[0] = params['total_birds']
+  total_birds = params['total_birds']
   
   for y in params['years']:
+    bird_locs = [0] * cells
+    bird_locs[0] = total_birds
+    
     for d in params['days'][:-1]:
       for i in range(cells):
         for j in range(cells):
@@ -99,9 +100,10 @@ def drawBirdMoves(params, bird_moves, path):
 
 def testDrawBirdMoves():
   from train_birds import model, params
+  params['years'] = range(3)
   params['days'] = range(20)
   
-  drawBirdMoves(params, model.ground, 'test')
+  drawBirdMoves(params, model.ground, 'ground')
 
 def toVenture(thing):
   if isinstance(thing, dict):
