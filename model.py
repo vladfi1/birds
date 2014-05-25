@@ -127,6 +127,8 @@ class Poisson(VentureUnit):
 
   def __init__(self, ripl, params):
     self.name = params['name']
+    self.width = params['width']
+    self.height = params['height']
     self.cells = params['cells']
     self.dataset = params['dataset']
     self.total_birds = params['total_birds']
@@ -156,13 +158,34 @@ class Poisson(VentureUnit):
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
     ripl.assume('features', self.features)
 
-    # phi is the unnormalized probability of a bird moving
-    # from cell i to cell j on day d
+    ripl.assume('width', self.width)
+    ripl.assume('height', self.height)
+    ripl.assume('max_dist2', '18')
+
+    ripl.assume('cell2X', '(lambda (cell) (int_div cell height))')
+    ripl.assume('cell2Y', '(lambda (cell) (int_mod cell height))')
+    #ripl.assume('cell2P', '(lambda (cell) (make_pair (cell2X cell) (cell2Y cell)))')
+    ripl.assume('XY2cell', '(lambda (x y) (+ (* height x) y))')
+
+    ripl.assume('square', '(lambda (x) (* x x))')
+
+    ripl.assume('dist2', """
+      (lambda (x1 y1 x2 y2)
+        (+ (square (- x1 x2)) (square (- y1 y2))))""")
+
+    ripl.assume('cell_dist2', """
+      (lambda (i j)
+        (dist2
+          (cell2X i) (cell2Y i)
+          (cell2X j) (cell2Y j)))""")
+    
+    # phi is the unnormalized probability of a bird moving from cell i to cell j on day d
     ripl.assume('phi', """
       (mem (lambda (y d i j)
-        (let ((fs (lookup features (array y d i j))))
-          (exp %s))))"""
-       % fold('+', '(* hypers_k (lookup fs _k))', '_k', num_features))
+        (if (> (cell_dist2 i j) max_dist2) 0
+          (let ((fs (lookup features (array y d i j))))
+            (exp %s)))))"""
+            % fold('+', '(* hypers__k (lookup fs __k))', '__k', num_features))
 
     ripl.assume('get_bird_move_dist', """
       (lambda (y d i)
