@@ -247,7 +247,7 @@ class Poisson(VentureUnit):
     
     bird_moves = {}
     
-    for d in self.days:
+    for d in self.days[:-1]:
       bird_moves_raw = self.ripl.sample('(get_birds_moving3 %d)' % d)
       for y in self.years:
         for i in range(self.cells):
