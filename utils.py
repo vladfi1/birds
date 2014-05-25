@@ -62,18 +62,23 @@ def ensure(path):
     os.makedirs(path)
 
 def drawBirds(params, bird_locs, filename):
+  scale = 10
+  
   width = params['width']
   height = params['height']
   
-  bitmap = np.ndarray(shape=(width, height))
+  bitmap = np.ndarray(shape=(width*scale, height*scale))
   
   #import pdb; pdb.set_trace()
   
   for x in range(width):
-    for y in range(height):
-      bitmap[x, y] = bird_locs[x * height + y]
+    for xs in range(scale):
+      for y in range(height):
+        for ys in range(scale):
+          bitmap[x*scale+xs, y*scale+ys] = bird_locs[x * height + y]
   
   print "Saving images to %s" % filename
+  #plt.imshow(bitmap)
   misc.imsave(filename, bitmap)
 
 def drawBirdMoves(params, bird_moves, path):
