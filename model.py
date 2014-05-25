@@ -210,12 +210,14 @@ class Poisson(VentureUnit):
     
     ripl.assume('bird_movements_loc', """
       (mem (lambda (y d i)
-        (let ((normalize (foldl + 0 0 cells (lambda (j) (phi y d i j)))))
-          (mem (lambda (j)
-            (let ((n (* (count_birds y d i) (/ (phi y d i j) normalize))))
-              (if (= n 0) 0
-                (scope_include d (array y d i j)
-                  (poisson n)))))))))""")
+        (if (= (count_birds y d i) 0)
+          (lambda (j) 0)
+          (let ((normalize (foldl + 0 0 cells (lambda (j) (phi y d i j)))))
+            (mem (lambda (j)
+              (if (= (phi y d i j) 0) 0
+                (let ((n (* (count_birds y d i) (/ (phi y d i j) normalize))))
+                  (scope_include d (array y d i j)
+                    (poisson n))))))))))""")
     
     #ripl.assume('bird_movements', '(mem (lambda (y d) %s))' % fold('array', '(bird_movements_loc y d __i)', '__i', self.cells))
     
