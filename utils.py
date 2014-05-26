@@ -61,11 +61,8 @@ def ensure(path):
   if not os.path.exists(path):
     os.makedirs(path)
 
-def drawBirds(params, bird_locs, filename):
+def drawBirds(bird_locs, filename, width=None, height=None, **kwargs):
   scale = 10
-  
-  width = params['width']
-  height = params['height']
   
   bitmap = np.ndarray(shape=(width*scale, height*scale))
   
@@ -81,17 +78,12 @@ def drawBirds(params, bird_locs, filename):
   #plt.imshow(bitmap)
   misc.imsave(filename, bitmap)
 
-def drawBirdMoves(params, bird_moves, path):
-  index = 0
-  
-  cells = params['cells']
-  total_birds = params['total_birds']
-  
-  for y in params['years']:
+def drawBirdMoves(bird_moves, path, cells=None, total_birds=None, years=None, days=None, **params):
+  for y in years:
     bird_locs = [0] * cells
     bird_locs[0] = total_birds
     
-    for d in params['days'][:-1]:
+    for d in days[:-1]:
       for i in range(cells):
         for j in range(cells):
           move = bird_moves[(y, d, i, j)]
@@ -101,14 +93,31 @@ def drawBirdMoves(params, bird_moves, path):
       p = path + '/%d' % y
       ensure(p)
       filename = p + '/%02d.png' % (d+1)
-      drawBirds(params, bird_locs, filename)
+      drawBirds(bird_locs, filename, **params)
 
-def testDrawBirdMoves():
-  from train_birds import model, params
-  params['years'] = range(3)
-  params['days'] = range(20)
-  
-  drawBirdMoves(params, model.ground, 'ground')
+def testDrawBirdMoves(dataset):
+  params = getParams(dataset)
+  drawBirdMoves(readReconstruction(params), 'ground%d' % dataset, **params)
+
+def getParams(dataset):
+  params = {'dataset': dataset}
+
+  if dataset == 1:
+    params['width'] = params['height'] = 4
+    params['total_birds'] = 1
+    params['name'] = 'onebird'
+    params['years'] = range(30)
+    params['days'] = range(20)
+  else:
+    params['width'] = params['height'] = 10
+    params['total_birds'] = 1000 if dataset == 2 else 1000000
+    params['name'] = "%dx%dx%d-train" % (params['width'], params['height'], params['total_birds'])
+    params['years'] = range(3)
+    params['days'] = range(20)
+    
+  params['cells'] = params['width'] * params['height']
+
+  return params
 
 def toVenture(thing):
   if isinstance(thing, dict):
@@ -176,3 +185,6 @@ def avgFinalValue(history, name):
   values = [s.values[-1] for s in series]
   return np.average(values)
 
+def normalize(l):
+  s = sum(l)
+  return [e/s for e in l]

@@ -4,9 +4,7 @@ import venture.shortcuts as s
 ripl = s.make_puma_church_prime_ripl()
 
 from utils import *
-from model import Poisson
-
-num_features = 4
+from model import Poisson, num_features
 
 width = 10
 height = 10
@@ -16,7 +14,7 @@ dataset = 2
 total_birds = 1000 if dataset == 2 else 1000000
 name = "%dx%dx%d-train" % (width, height, total_birds)
 Y = 1
-D = 3
+D = 6
 
 runs = 1
 
@@ -31,7 +29,7 @@ params = {
   "dataset":dataset,
   "total_birds":total_birds,
   "years":range(Y),
-  "days":[0],
+  "days":[],
   "hypers":hypers,
 }
 
@@ -100,12 +98,18 @@ def run(pgibbs=True):
     model.updateObserves(d)
     log()
     
-    for i in range(0):
-      ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y * cells ** 2})
+    for i in range(5):
+      ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y*1000})
       log()
+      continue
+      bird_locs = model.getBirdLocations(days=[d])
+      
+      for y in range(Y):
+        path = 'bird_moves%d/%d/%02d/' % (dataset, y, d)
+        ensure(path)
+        drawBirds(bird_locs[y][d], path + '%02d.png' % i, **params)
   
-  params['days'] = range(D)
-  drawBirdMoves(params, model.getBirdMoves(), 'bird_moves')
+  model.drawBirdLocations()
   
   return logs
 

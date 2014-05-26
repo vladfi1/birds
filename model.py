@@ -259,14 +259,26 @@ class Poisson(VentureUnit):
     self.ripl.infer('(incorporate)')
     #self.ripl.predict(fold('array', '(get_birds_moving3 __d)', '__d', len(self.days)-1), label='bird_moves')
   
-  def getBirdLocations(self):
+  def getBirdLocations(self, years=None, days=None):
+    if years is None: years = self.years
+    if days is None: days = self.days
+    
     bird_locations = {}
-    for y in self.years:
+    for y in years:
       bird_locations[y] = {}
-      for d in self.days:
-        bird_locations[y][d] = [ripl.sample('(count_birds %d %d %d)' % (y, d, i)) for i in range(self.cells)]
+      for d in days:
+        bird_locations[y][d] = [self.ripl.sample('(count_birds %d %d %d)' % (y, d, i)) for i in range(self.cells)]
     
     return bird_locations
+  
+  def drawBirdLocations(self):
+    bird_locs = self.getBirdLocations()
+  
+    for y in self.years:
+      path = 'bird_moves%d/%d/' % (self.dataset, y)
+      ensure(path)
+      for d in self.days:
+        drawBirds(bird_locs[y][d], path + '%02d.png' % d, **self.parameters)
   
   def getBirdMoves(self):
     
