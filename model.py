@@ -70,11 +70,9 @@ class OneBird(VentureUnit):
     # the bird's id is used to identify the scope
     ripl.assume('move', """
       (lambda (y d i)
-        (scope_include (quote move) (array y d)
-            (categorical
-              (scope_exclude (quote move)
-                (get_bird_move_dist y d i))
-              cell_array)))""")
+        (let ((dist (get_bird_move_dist y d i)))
+          (scope_include (quote move) (array y d)
+            (categorical dist cell_array))))""")
 
     ripl.assume('get_bird_pos', """
       (mem (lambda (y d)
@@ -95,7 +93,7 @@ class OneBird(VentureUnit):
     observations_file = "data/input/dataset%d/%s-observations.csv" % (1, self.name)
     observations = readObservations(observations_file)
 
-    unconstrained = []
+    self.unconstrained = []
 
     for y in self.years:
       for (d, ns) in observations[y]:
@@ -110,12 +108,17 @@ class OneBird(VentureUnit):
             break
         
         if loc is None:
-          unconstrained.append((y, d))
+          self.unconstrained.append((y, d-1))
           #ripl.predict('(get_bird_pos %d %d)' % (y, d))
         else:
           ripl.observe('(get_bird_pos %d %d)' % (y, d), loc)
+  
+  def inferMove(self, ripl = None):
+    if ripl is None:
+      ripl = self.ripl
     
-    return unconstrained
+    for block in self.unconstrained:
+      ripl.infer({'kernel': 'gibbs', 'scope': 'move', 'block': block, 'transitions': 1})
   
   def makeAssumes(self):
     self.loadAssumes(ripl=self)
