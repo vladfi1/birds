@@ -29,7 +29,7 @@ def run(y):
     for i in range(5):
       onebird.inferMove(ripl=r)
     #r.infer('(slice hypers one %d)' % num_features)
-    r.infer('(mh hypers one %d)' % 5 * num_features)
+    r.infer('(mh hypers one %d)' % 5 * (1 + num_features))
 
   history, _ = onebird.runFromConditional(D, runs=runs, infer=sweep, verbose=True)
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]

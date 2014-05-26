@@ -44,8 +44,10 @@ class OneBird(VentureUnit):
     print "Loading assumes"
 
     # we want to infer the hyperparameters of a log-linear model
+    ripl.assume('scale', '(scope_include (quote hypers) (quote scale) (gamma 1 1))')
+    
     for k in range(num_features):
-      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 100))' % k)
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (* scale (normal 0 10)))' % k)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
