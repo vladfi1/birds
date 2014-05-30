@@ -9,13 +9,13 @@ width = 4
 height = 4
 cells = width * height
 
-Y = 1
+Y = 2
 D = 20
 
 params = {
   "name":name,
   "cells":cells,
-  "years":[0],
+  "years":range(Y),
   "days":range(D)
 }
 
@@ -27,13 +27,13 @@ def checkHypers(hypers):
   print hypers
   for i in range(num_features):
     onebird.ripl.force('hypers%d' % i, hypers[i])
-  for i in range(5):
-    onebird.inferMove()
+  #for i in range(5):
+  #  onebird.inferMove()
   return onebird.ripl.get_global_logscore()
 
 def gridHypers(grid):
   return {hypers:checkHypers(hypers) for hypers in product(*grid)}
 
-grid = [range(-10, 11, 4) for i in range(4)]
+grid = [range(-2, 11, 4) for i in range(4)]
 scoreTable = gridHypers(grid)
 scores = sorted(scoreTable.items(), key=lambda (k,v): v, reverse=True)

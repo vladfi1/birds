@@ -47,7 +47,8 @@ class OneBird(VentureUnit):
     ripl.assume('scale', '(scope_include (quote hypers) (quote scale) (gamma 1 1))')
     
     for k in range(num_features):
-      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (* scale (normal 0 10)))' % k)
+      #ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (* scale (normal 0 10)))' % k)
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
@@ -98,6 +99,7 @@ class OneBird(VentureUnit):
     self.unconstrained = []
 
     for y in self.years:
+      prev = 0
       for (d, ns) in observations[y]:
         if d not in self.days: continue
         if d == 0: continue
@@ -113,7 +115,11 @@ class OneBird(VentureUnit):
           self.unconstrained.append((y, d-1))
           #ripl.predict('(get_bird_pos %d %d)' % (y, d))
         else:
-          ripl.observe('(get_bird_pos %d %d)' % (y, d), loc)
+          if prev is not None:
+            ripl.observe('(move %d %d %d)' % (y, d-1, prev), loc)
+          prev = loc
+    
+    print len(self.unconstrained)
   
   def inferMove(self, ripl = None):
     if ripl is None:

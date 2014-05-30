@@ -8,7 +8,7 @@ width = 4
 height = 4
 cells = width * height
 
-Y = 1
+Y = 2
 D = 20
 
 runs=1
@@ -26,10 +26,10 @@ def run(y):
   onebird = OneBird(ripl, params)
   
   def sweep(r, *args):
-    for i in range(5):
+    for i in range(0):
       onebird.inferMove(ripl=r)
     #r.infer('(slice hypers one %d)' % num_features)
-    r.infer('(mh hypers one %d)' % 5 * (1 + num_features))
+    r.infer('(mh hypers one %d)' % 50 * (1 + num_features))
 
   history, _ = onebird.runFromConditional(D, runs=runs, infer=sweep, verbose=True)
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
