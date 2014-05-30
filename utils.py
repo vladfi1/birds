@@ -95,7 +95,7 @@ def drawBirdMoves(bird_moves, path, cells=None, total_birds=None, years=None, da
       filename = p + '/%02d.png' % (d+1)
       drawBirds(bird_locs, filename, **params)
 
-def testDrawBirdMoves(dataset):
+def drawGroundMoves(dataset):
   params = getParams(dataset)
   drawBirdMoves(readReconstruction(params), 'ground%d' % dataset, **params)
 
