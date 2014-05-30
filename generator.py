@@ -47,4 +47,4 @@ def generate(dataset=None, name=None, cells=None, years=None, days=None, total_b
     for d in days:
       drawBirds(bird_locs(y, d), path + '%02d.png' % d, **params)
 
-generate(**getParams(2))
+generate(**getParams(3))
