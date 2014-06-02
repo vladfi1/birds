@@ -48,7 +48,7 @@ class OneBird(VentureUnit):
     
     for k in range(num_features):
       #ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (* scale (normal 0 10)))' % k)
-      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (normal 0 10))' % k)
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 1 0.05))' % k)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
