@@ -44,7 +44,7 @@ class OneBird(VentureUnit):
     print "Loading assumes"
 
     # we want to infer the hyperparameters of a log-linear model
-    ripl.assume('scale', '(scope_include (quote hypers) (quote scale) (gamma 1 1))')
+    #ripl.assume('scale', '(scope_include (quote hypers) (quote scale) (gamma 1 1))')
     
     for k in range(num_features):
       #ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (* scale (normal 0 10)))' % k)
@@ -97,7 +97,8 @@ class OneBird(VentureUnit):
     observations = readObservations(observations_file)
 
     self.unconstrained = []
-
+    moves = 0
+    
     for y in self.years:
       prev = 0
       for (d, ns) in observations[y]:
@@ -117,9 +118,10 @@ class OneBird(VentureUnit):
         else:
           if prev is not None:
             ripl.observe('(move %d %d %d)' % (y, d-1, prev), loc)
+            moves += 1
           prev = loc
     
-    print len(self.unconstrained)
+    print moves
   
   def inferMove(self, ripl = None):
     if ripl is None:
