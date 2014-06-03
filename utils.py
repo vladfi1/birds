@@ -49,8 +49,8 @@ def readReconstruction(params):
   
   return bird_moves
 
-def writeReconstruction(bird_moves, dataset=None, total_birds=None, **params):
-  filename = "data/output/dataset%d/10x10x%d-reconstruction.csv" % (dataset, total_birds)
+def writeReconstruction(bird_moves, dataset=None, name=None, **params):
+  filename = "data/output/dataset%d/%s-reconstruction.csv" % (dataset, name)
   
   with open(filename, 'w') as f:
     for key, value in sorted(bird_moves.items()):
@@ -59,8 +59,8 @@ def writeReconstruction(bird_moves, dataset=None, total_birds=None, **params):
   
   print "Wrote reconstruction to " + filename
 
-def writePredictions(predictions, dataset=None, total_birds=None, **params):
-  filename = "data/output/dataset%d/10x10x%d-prediction.csv" % (dataset, total_birds)
+def writePredictions(predictions, dataset=None, name=None, **params):
+  filename = "data/output/dataset%d/%s-prediction.csv" % (dataset, name)
   
   with open(filename, 'w') as f:
     for key, values in sorted(predictions.items()):
