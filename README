@@ -1,0 +1,18 @@
+Birds in Venture
+================
+
+To run on dataset 1:
+
+  $ python onebird.py
+
+To do reconstruction on datasets 2/3:
+
+  $ python train_birds.py [dataset]
+  
+Where [dataset] is either 2 or 3.
+
+To do prediction on datasets 2/3:
+
+  $ python predict_birds.py [dataset]
+
+All output is in the data/output/ folder.
