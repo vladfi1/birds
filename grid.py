@@ -22,6 +22,7 @@ params = {
 onebird = OneBird(ripl, params)
 onebird.loadAssumes()
 onebird.loadObserves()
+ripl.infer('(incorporate)')
 
 def checkHypers(hypers):
   print hypers
@@ -34,6 +35,7 @@ def checkHypers(hypers):
 def gridHypers(grid):
   return {hypers:checkHypers(hypers) for hypers in product(*grid)}
 
-grid = [range(-2, 11, 4) for i in range(4)]
+grid = [range(2, 15, 4) for i in range(4)]
 scoreTable = gridHypers(grid)
 scores = sorted(scoreTable.items(), key=lambda (k,v): v, reverse=True)
+
