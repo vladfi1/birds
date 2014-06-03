@@ -14,7 +14,7 @@ dataset = 2
 total_birds = 1000 if dataset == 2 else 1000000
 name = "%dx%dx%d-test" % (width, height, total_birds)
 Y = 1
-D = 2
+D = 20
 
 runs = 1
 
@@ -50,14 +50,22 @@ def run():
       for i in range(5):
         ripl.infer({"kernel":"mh", "scope":d-1, "block":"one", "transitions": Y*1000})
     
-    bird_moves = [ripl.predict('(get_birds_moving3 %d)' % t, label="predict%d" % t) for t in [d, d+1]]
+    last_day = (d == D-2)
+    
+    if last_day:
+      bird_moves = ripl.predict('(get_birds_moving3 %d)' % t, label="predict%d" % d)
+    else:
+      bird_moves = [ripl.predict('(get_birds_moving3 %d)' % t, label="predict%d" % t) for t in [d, d+1]]
     
     for y in range(Y):
       for i in range(cells):
         for j in range(cells):
-          predictions[(y, d-1, i, j)] = [b[y][i][j] for b in bird_moves]
+          if last_day:
+            predictions[(y, d-1, i, j)] = [bird_moves[y][i][j], -1]
+          else:
+            predictions[(y, d-1, i, j)] = [b[y][i][j] for b in bird_moves]
     
-    for t in [d, d+1]:
+    for t in ([d] if last_day else [d, d+1]):
       ripl.forget("predict%d" % t)
     
   #model.drawBirdLocations()
