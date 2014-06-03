@@ -44,24 +44,48 @@ def runInParallel():
     processes.append(p)
     p.start()
 
-  import pickle
-
-  histories = []
-
   for y in range(Y):
     processes[y].join()
+
+def computeWeightedHypers(years=range(Y)):
+  lxs = [[] for k in range(num_features)]
+
+  import pickle
+  
+  for y in years:
     with open("%s/%d/run_from_conditional" % (name, y)) as f:
-      histories.append(pickle.load(f))
-
-  import numpy as np
-
-  for h in histories:
-    print h.hypers
-
-  hypers = [np.average([h.hypers[i] for h in histories]) for i in range(num_features)]
+      history = pickle.load(f)
+      logscores = history.nameToSeries['logscore']
+      for k in range(num_features):
+        for lseries, xseries in zip(logscores, history.nameToSeries['hypers%d' % k]):
+          lxs[k].append((lseries.values[-1], xseries.values[-1]))
+  
+  hypers = map(weightedAverage, lxs)
   print hypers
   
   writeHypers(hypers, dataset=1)
 
+def computeHypers(years=range(Y)):
+  histories = []
+
+  import pickle
+  
+  for y in years:
+    with open("%s/%d/run_from_conditional" % (name, y)) as f:
+      histories.append(pickle.load(f))
+  
+  from numpy import average, std
+  
+  hypers = zip(*[h.hypers for h in histories])
+  
+  means = map(average, hypers)
+  stds = map(std, hypers)
+  
+  print "Means: " + str(means)
+  print "Stds:  " + str(stds)
+  
+  writeHypers(means, dataset=1)
+
 if __name__ == "__main__":
   runInParallel()
+  computeHypers()
