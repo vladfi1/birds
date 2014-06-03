@@ -50,8 +50,7 @@ class OneBird(VentureUnit):
       #ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 2 inv_scale))' % k)
       ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 1 0.1))' % k)
     
-    # the features will all be observed
-    #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
+    # features are loaded from file
     ripl.assume('features', self.features)
 
     # phi is the unnormalized probability of a bird moving
