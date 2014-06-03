@@ -10,7 +10,12 @@ width = 10
 height = 10
 cells = width * height
 
+import sys
+
 dataset = 2
+if len(sys.argv) > 1:
+  dataset = int(sys.argv[1])
+
 total_birds = 1000 if dataset == 2 else 1000000
 name = "%dx%dx%d-train" % (width, height, total_birds)
 Y = 1
