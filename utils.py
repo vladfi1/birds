@@ -49,13 +49,34 @@ def readReconstruction(params):
   
   return bird_moves
 
-def writeReconstruction(params, bird_moves):
-  filename = "data/output/dataset%d/10x10x%d-reconstruction-ground.csv" % (params["dataset"], params["total_birds"])
+def writeReconstruction(bird_moves, dataset=None, total_birds=None, **params):
+  filename = "data/output/dataset%d/10x10x%d-reconstruction.csv" % (dataset, total_birds)
   
   with open(filename, 'w') as f:
     for key, value in sorted(bird_moves.items()):
       f.write(','.join(map(str, [k+1 for k  in key] + [value])))
       f.write('\n')
+  
+  print "Wrote reconstruction to " + filename
+
+def writePredictions(predictions, dataset=None, total_birds=None, **params):
+  filename = "data/output/dataset%d/10x10x%d-prediction.csv" % (dataset, total_birds)
+  
+  with open(filename, 'w') as f:
+    for key, values in sorted(predictions.items()):
+      f.write(','.join(map(str, [k+1 for k  in key] + values)))
+      f.write('\n')
+  
+  print "Wrote predictions to " + filename
+
+def writeHypers(hypers, dataset=None, **params):
+  filename = "data/output/dataset%d/estimated-parameters.csv" % dataset
+  
+  with open(filename, 'w') as f:
+      f.write(','.join(map(str, hypers)))
+      f.write('\n')
+  
+  print "Wrote parameters to " + filename
 
 def ensure(path):
   if not os.path.exists(path):

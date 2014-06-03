@@ -28,8 +28,7 @@ def run(y):
   def sweep(r, *args):
     for i in range(0):
       onebird.inferMove(ripl=r)
-    #r.infer('(slice hypers one %d)' % (1 + num_features))
-    r.infer('(mh hypers one %d)' % 100 * (1 + num_features))
+    onebird.inferHypers(ripl=r)
 
   history, _ = onebird.runFromConditional(D, runs=runs, infer=sweep, verbose=True)
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
@@ -58,5 +57,7 @@ def runInParallel():
 
   hypers = [np.average([h.hypers[i] for h in histories]) for i in range(num_features)]
   print hypers
+  
+  writeHypers(hypers, dataset=1)
 
 runInParallel()
