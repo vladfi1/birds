@@ -75,8 +75,9 @@ def writeHypers(hypers, dataset=None, **params):
   filename = "data/output/dataset%d/estimated-parameters.csv" % dataset
   
   with open(filename, 'w') as f:
-      f.write(','.join(map(str, hypers)))
-      f.write('\n')
+    f.write("b1,b2,b3,b4\n")
+    f.write(','.join(map(str, hypers)))
+    f.write('\n')
   
   print "Wrote parameters to " + filename
 
@@ -211,3 +212,15 @@ def avgFinalValue(history, name):
 def normalize(l):
   s = sum(l)
   return [e/s for e in l]
+
+def weightedAverage(lxs):
+  ls, xs = zip(*lxs)
+  
+  lmax = max(ls)
+  ls = [l - lmax for l in ls]
+  
+  from math import exp
+  ws = map(exp, ls)
+  
+  return sum([w * x for w, x in zip(ws, xs)]) / sum(ws)
+
