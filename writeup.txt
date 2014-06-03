@@ -1,0 +1,48 @@
+Onebird Writeup
+
+Methods:
+
+First, we pre-process the data into known bird movements {(t, i, j)}, where each triplet {(t, i, j)} represents the bird traveling from cell i to cell j on timestep t. For inference, we place a Gamma(1, 0.1) prior over the betas, and do slice sampling conditioned on the known bird movements. For performance reasons we do inference on each year in parallel, and then aggregate the results.
+
+Model:
+
+# the beta parameters of the log-linear model
+ripl.assume('hypers', '(mem (lambda (k) (scope_include (quote hypers) k (gamma 1 0.1))))')
+
+# features are loaded from file
+ripl.assume('features', features)
+
+# phi is the unnormalized probability of a bird moving
+# from cell i to cell j on day d
+ripl.assume('phi', """
+  (mem (lambda (y d i j)
+    (let ((fs (lookup features (array y d i j))))
+      (exp (foldl + 0 0 num_features hypers)))))"""
+
+# distribution over cells a bird would move to from
+# cell i on day d
+ripl.assume('get_bird_move_dist',
+  '(mem (lambda (y d i) ' +
+    fold('simplex', '(phi y d i j)', 'j', self.cells) +
+  '))')
+
+ripl.assume('cell_array', fold('array', 'j', 'j', self.cells))
+
+# samples where a bird would move to from cell i on day d
+ripl.assume('move', """
+  (lambda (y d i)
+    (let ((dist (get_bird_move_dist y d i)))
+      (categorical dist cell_array)))""")
+
+Observations:
+
+for (y, d, i, j) in data:
+  ripl.observe('(move y d i)', j)
+
+Inference:
+
+ripl.infer('(slice hypers one 400)')
+
+Results:
+
+There appears to be a great deal of posterior uncertainty, both between runs and from year to year. Averaging does result in estimates which are comparable to the ground truths. [How should results be displayed?]
