@@ -53,6 +53,7 @@ def writeReconstruction(bird_moves, dataset=None, name=None, **params):
   filename = "data/output/dataset%d/%s-reconstruction.csv" % (dataset, name)
   
   with open(filename, 'w') as f:
+    f.write("Year,Day,FromCell,ToCell,number.of.birds\n")
     for key, value in sorted(bird_moves.items()):
       f.write(','.join(map(str, [k+1 for k  in key] + [value])))
       f.write('\n')
@@ -63,6 +64,7 @@ def writePredictions(predictions, dataset=None, name=None, **params):
   filename = "data/output/dataset%d/%s-prediction.csv" % (dataset, name)
   
   with open(filename, 'w') as f:
+    f.write("Year,Day,FromCell,ToCell,number.birds,number.birds2\n")
     for key, values in sorted(predictions.items()):
       f.write(','.join(map(str, [k+1 for k  in key] + values)))
       f.write('\n')
