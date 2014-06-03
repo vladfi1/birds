@@ -71,8 +71,9 @@ def sweep(r, *args):
   
   print "pgibbs: %f, mh: %f" % (t1-t0, t2-t1)
 
-def run(pgibbs=True):
-  print "Starting run"
+def run(pgibbs=True, verbose=True):
+  if verbose:
+    print "Starting run"
   ripl.clear()
   model.loadAssumes()
   model.updateObserves(0)
@@ -90,7 +91,8 @@ def run(pgibbs=True):
   def log():
     dt = time.time() - t[0]
     logs.append((ripl.get_global_logscore(), model.computeScoreDay(model.days[-2]), dt))
-    print logs[-1]
+    if verbose:
+      print logs[-1]
     t[0] += dt
   
   for d in range(1, D):
@@ -109,7 +111,8 @@ def run(pgibbs=True):
         ensure(path)
         drawBirds(bird_locs[y][d], path + '%02d.png' % i, **params)
   
-  model.drawBirdLocations()
+  #model.drawBirdLocations()
+  model.writeBirdMoves()
   
   return logs
 
