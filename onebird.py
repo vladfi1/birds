@@ -55,9 +55,13 @@ def runInParallel():
 
   import numpy as np
 
+  for h in histories:
+    print h.hypers
+
   hypers = [np.average([h.hypers[i] for h in histories]) for i in range(num_features)]
   print hypers
   
   writeHypers(hypers, dataset=1)
 
-runInParallel()
+if __name__ == "__main__":
+  runInParallel()
