@@ -44,11 +44,11 @@ class OneBird(VentureUnit):
     print "Loading assumes"
 
     # we want to infer the hyperparameters of a log-linear model
-    ripl.assume('inv_scale', '(scope_include (quote hypers) (quote inv_scale) (gamma 1 5))')
+    #ripl.assume('inv_scale', '(scope_include (quote hypers) (quote inv_scale) (gamma 1 5))')
     
     for k in range(num_features):
-      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 2 inv_scale))' % k)
-      #ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 1 0.05))' % k)
+      #ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 2 inv_scale))' % k)
+      ripl.assume('hypers%d' % k, '(scope_include (quote hypers) %d (gamma 1 0.1))' % k)
     
     # the features will all be observed
     #ripl.assume('features', '(mem (lambda (y d i j k) (normal 0 1)))')
@@ -59,7 +59,7 @@ class OneBird(VentureUnit):
     ripl.assume('phi', """
       (mem (lambda (y d i j)
         (let ((fs (lookup features (array y d i j))))
-          %s)))"""
+          (exp %s))))"""
        % fold('+', '(* hypers_k_ (lookup fs _k_))', '_k_', num_features))
 
     ripl.assume('get_bird_move_dist',
@@ -75,7 +75,7 @@ class OneBird(VentureUnit):
       (lambda (y d i)
         (let ((dist (get_bird_move_dist y d i)))
           (scope_include (quote move) (array y d)
-            (log_categorical dist cell_array))))""")
+            (categorical dist cell_array))))""")
 
     ripl.assume('get_bird_pos', """
       (mem (lambda (y d)
@@ -312,6 +312,9 @@ class Poisson(VentureUnit):
             bird_moves[(y, d, i, j)] = bird_moves_raw[y][i][j]
     
     return bird_moves
+  
+  def writeBirdMoves(self):
+    writeReconstruction(self.getBirdMoves(), **self.parameters)
   
   def computeScoreDay(self, d):
     bird_moves = self.ripl.sample('(get_birds_moving3 %d)' % d)
