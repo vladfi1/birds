@@ -51,6 +51,7 @@ def readReconstruction(params):
 
 def writeReconstruction(bird_moves, dataset=None, name=None, **params):
   filename = "data/output/dataset%d/%s-reconstruction.csv" % (dataset, name)
+  ensure(filename)
   
   with open(filename, 'w') as f:
     f.write("Year,Day,FromCell,ToCell,number.of.birds\n")
@@ -62,6 +63,7 @@ def writeReconstruction(bird_moves, dataset=None, name=None, **params):
 
 def writePredictions(predictions, dataset=None, name=None, **params):
   filename = "data/output/dataset%d/%s-prediction.csv" % (dataset, name)
+  ensure(filename)
   
   with open(filename, 'w') as f:
     f.write("Year,Day,FromCell,ToCell,number.birds,number.birds2\n")
@@ -73,6 +75,7 @@ def writePredictions(predictions, dataset=None, name=None, **params):
 
 def writeHypers(hypers, dataset=None, **params):
   filename = "data/output/dataset%d/estimated-parameters.csv" % dataset
+  ensure(filename)
   
   with open(filename, 'w') as f:
     f.write("b1,b2,b3,b4\n")
@@ -82,6 +85,7 @@ def writeHypers(hypers, dataset=None, **params):
   print "Wrote parameters to " + filename
 
 def ensure(path):
+  path = path[:path.rfind('/')]
   if not os.path.exists(path):
     os.makedirs(path)
 
