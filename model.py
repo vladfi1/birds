@@ -7,8 +7,8 @@ num_features = 4
 
 def loadFeatures(path=None, dataset=None, name=None, years=None, days=None, **params):
   if path is None:
-    path = "data/input/dataset%d/" % dataset
-  features_file = path + "%s-features.csv" % name
+    path = "data/input/"
+  features_file = path + "dataset%d/%s-features.csv" % (dataset, name)
   
   print "Loading features from %s" % features_file
   features = readFeatures(features_file)

@@ -13,7 +13,7 @@ D = 3
 
 runs=1
 
-def run(y, days, runs):
+def run(y, days, runs, path=None):
   ripl = s.make_puma_church_prime_ripl()
   
   params = {
@@ -22,6 +22,7 @@ def run(y, days, runs):
     "cells":cells,
     "years":[y],
     "days":days,
+    "path":path
   }
 
   onebird = OneBird(ripl, params)
@@ -35,13 +36,13 @@ def run(y, days, runs):
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
   history.save(directory="%s/%d" % (name, y))
 
-def runInParallel(Y=Y, D=D, runs=1):
+def runInParallel(Y=Y, D=D, runs=runs, path=None):
   from multiprocessing import Process
 
   processes = []
 
   for y in range(Y):
-    p = Process(target = run, args=(y,range(D),runs))
+    p = Process(target = run, args=(y,range(D),runs,path))
     processes.append(p)
     p.start()
 
@@ -70,5 +71,5 @@ def computeHypers(Y=Y, path=None):
   writeHypers(means, path=path, dataset=1)
 
 if __name__ == "__main__":
-  runInParallel()
-  computeHypers()
+  runInParallel(path='data/input/')
+  computeHypers(path='data/output/')
