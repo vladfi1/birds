@@ -10,45 +10,40 @@ width = 10
 height = 10
 cells = width * height
 
-import sys
-
-dataset = 2
-if len(sys.argv) > 1:
-  dataset = int(sys.argv[1])
-
-total_birds = 1000 if dataset == 2 else 1000000
-name = "%dx%dx%d-test" % (width, height, total_birds)
-Y = 1
-D = 20
-
-runs = 1
-
 # these are ground truths
 hypers = [5, 10, 10, 10]
 
-params = {
-  "name":name,
-  "width":width,
-  "height":height,
-  "cells":cells,
-  "dataset":dataset,
-  "total_birds":total_birds,
-  "years":range(Y),
-  "days":[],
-  "hypers":hypers,
-}
+def run(verbose=True, Y=1, D=2, dataset=2, in_path=None, out_path=None, steps=2):
 
-model = Poisson(ripl, params)
+  total_birds = 1000 if dataset == 2 else 1000000
+  name = "%dx%dx%d-test" % (width, height, total_birds)
 
-def run():
-  print "Starting run"
+  params = {
+    "name":name,
+    "width":width,
+    "height":height,
+    "cells":cells,
+    "dataset":dataset,
+    "total_birds":total_birds,
+    "years":range(Y),
+    "days":[],
+    "hypers":hypers,
+    "in_path":in_path,
+    "out_path":out_path,
+  }
+
+  model = Poisson(ripl, params)
+
+  if verbose:
+    print "Starting run"
   ripl.clear()
   model.loadAssumes()
   
   predictions = {}
   
   for d in range(D-1):
-    print "Day %d" % d
+    if verbose:
+      print "Day %d" % d
     model.updateObserves(d)
     
     if d > 0:
@@ -58,7 +53,7 @@ def run():
     last_day = (d == D-2)
     
     if last_day:
-      bird_moves = ripl.predict('(get_birds_moving3 %d)' % t, label="predict%d" % d)
+      bird_moves = ripl.predict('(get_birds_moving3 %d)' % d, label="predict%d" % d)
     else:
       bird_moves = [ripl.predict('(get_birds_moving3 %d)' % t, label="predict%d" % t) for t in [d, d+1]]
     
