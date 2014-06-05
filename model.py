@@ -5,8 +5,11 @@ from venture.ripl.ripl import _strip_types
 
 num_features = 4
 
-def loadFeatures(dataset, name, years, days):
-  features_file = "data/input/dataset%d/%s-features.csv" % (dataset, name)
+def loadFeatures(path=None, dataset=None, name=None, years=None, days=None, **params):
+  if path is None:
+    path = "data/input/dataset%d/" % dataset
+  features_file = path + "%s-features.csv" % name
+  
   print "Loading features from %s" % features_file
   features = readFeatures(features_file)
   
@@ -16,9 +19,8 @@ def loadFeatures(dataset, name, years, days):
   
   return toVenture(features)
 
-def loadObservations(ripl, dataset, name, years, days):
-  observations_file = "data/input/dataset%d/%s-observations.csv" % (dataset, name)
-  observations = readObservations(observations_file)
+def loadObservations(ripl, years=None, days=None, **params):
+  observations = readObservations(**params)
 
   for y in years:
     for (d, ns) in observations[y]:
@@ -34,7 +36,7 @@ class OneBird(VentureUnit):
     self.cells = params['cells']
     self.years = params['years']
     self.days = params['days']
-    self.features = loadFeatures(1, self.name, self.years, self.days)
+    self.features = loadFeatures(**params)
     super(OneBird, self).__init__(ripl, params)
   
   def loadAssumes(self, ripl = None):
@@ -92,8 +94,7 @@ class OneBird(VentureUnit):
     if ripl is None:
       ripl = self.ripl
   
-    observations_file = "data/input/dataset%d/%s-observations.csv" % (1, self.name)
-    observations = readObservations(observations_file)
+    observations = readObservations(**self.parameters)
 
     self.unconstrained = []
     moves = 0
@@ -256,7 +257,7 @@ class Poisson(VentureUnit):
       ripl = self.ripl
     
     print "Loading observations"
-    loadObservations(ripl, self.dataset, self.name, self.years, self.days)
+    loadObservations(ripl, **self.parameters)
   
   def loadModel(self, ripl = None):
     if ripl is None:
@@ -274,7 +275,7 @@ class Poisson(VentureUnit):
     self.days.append(d)
     #if d > 0: self.ripl.forget('bird_moves')
     
-    loadObservations(self.ripl, self.dataset, self.name, self.years, [d])
+    loadObservations(self.ripl, days=[d], **self.parameters)
     self.ripl.infer('(incorporate)')
     #self.ripl.predict(fold('array', '(get_birds_moving3 __d)', '__d', len(self.days)-1), label='bird_moves')
   

@@ -8,19 +8,20 @@ width = 4
 height = 4
 cells = width * height
 
-Y = 3
-D = 20
+Y = 1
+D = 3
 
 runs=1
 
-def run(y):
+def run(y, days, runs):
   ripl = s.make_puma_church_prime_ripl()
   
   params = {
+    "dataset":1,
     "name":name,
     "cells":cells,
     "years":[y],
-    "days":range(D)
+    "days":days,
   }
 
   onebird = OneBird(ripl, params)
@@ -34,43 +35,25 @@ def run(y):
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
   history.save(directory="%s/%d" % (name, y))
 
-def runInParallel():
+def runInParallel(Y=Y, D=D, runs=1):
   from multiprocessing import Process
 
   processes = []
 
   for y in range(Y):
-    p = Process(target = run, args=(y,))
+    p = Process(target = run, args=(y,range(D),runs))
     processes.append(p)
     p.start()
 
   for y in range(Y):
     processes[y].join()
 
-def computeWeightedHypers(years=range(Y)):
-  lxs = [[] for k in range(num_features)]
-
-  import pickle
-  
-  for y in years:
-    with open("%s/%d/run_from_conditional" % (name, y)) as f:
-      history = pickle.load(f)
-      logscores = history.nameToSeries['logscore']
-      for k in range(num_features):
-        for lseries, xseries in zip(logscores, history.nameToSeries['hypers%d' % k]):
-          lxs[k].append((lseries.values[-1], xseries.values[-1]))
-  
-  hypers = map(weightedAverage, lxs)
-  print hypers
-  
-  writeHypers(hypers, dataset=1)
-
-def computeHypers(years=range(Y)):
+def computeHypers(Y=Y, path=None):
   histories = []
 
   import pickle
   
-  for y in years:
+  for y in range(Y):
     with open("%s/%d/run_from_conditional" % (name, y)) as f:
       histories.append(pickle.load(f))
   
@@ -84,7 +67,7 @@ def computeHypers(years=range(Y)):
   print "Means: " + str(means)
   print "Stds:  " + str(stds)
   
-  writeHypers(means, dataset=1)
+  writeHypers(means, path=path, dataset=1)
 
 if __name__ == "__main__":
   runInParallel()

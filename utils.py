@@ -27,8 +27,12 @@ def readFeatures(filename):
   
   return data
 
-def readObservations(filename):
-  csv = loadCSV(filename)
+def readObservations(path=None, dataset=None, name=None, **params):
+  if path is None:
+    path = "data/input/dataset%d/" % dataset
+  observations_file = path + "%s-observations.csv" % name
+
+  csv = loadCSV(observations_file)
   years = {}
   
   for row in csv[1:]:
@@ -49,8 +53,10 @@ def readReconstruction(params):
   
   return bird_moves
 
-def writeReconstruction(bird_moves, dataset=None, name=None, **params):
-  filename = "data/output/dataset%d/%s-reconstruction.csv" % (dataset, name)
+def writeReconstruction(bird_moves, path=None, dataset=None, name=None, **params):
+  if path is None:
+    path = "data/output/dataset%d/" % dataset
+  filename = path + "%s-reconstruction.csv" % name
   ensure(filename)
   
   with open(filename, 'w') as f:
@@ -61,8 +67,10 @@ def writeReconstruction(bird_moves, dataset=None, name=None, **params):
   
   print "Wrote reconstruction to " + filename
 
-def writePredictions(predictions, dataset=None, name=None, **params):
-  filename = "data/output/dataset%d/%s-prediction.csv" % (dataset, name)
+def writePredictions(predictions, path=None, dataset=None, name=None, **params):
+  if path is None:
+    path = "data/output/dataset%d/" % dataset
+  filename = path + "%s-prediction.csv" % name
   ensure(filename)
   
   with open(filename, 'w') as f:
@@ -73,8 +81,10 @@ def writePredictions(predictions, dataset=None, name=None, **params):
   
   print "Wrote predictions to " + filename
 
-def writeHypers(hypers, dataset=None, **params):
-  filename = "data/output/dataset%d/estimated-parameters.csv" % dataset
+def writeHypers(hypers, path=None, dataset=None, **params):
+  if path is None:
+    path = "data/output/dataset%d/" % dataset
+  filename = path + "estimated-parameters.csv"
   ensure(filename)
   
   with open(filename, 'w') as f:
