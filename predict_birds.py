@@ -1,7 +1,6 @@
 import time
 
 import venture.shortcuts as s
-ripl = s.make_puma_church_prime_ripl()
 
 from utils import *
 from model import Poisson, num_features
@@ -14,6 +13,7 @@ cells = width * height
 hypers = [5, 10, 10, 10]
 
 def run(verbose=True, Y=1, D=2, dataset=2, in_path=None, out_path=None, steps=2):
+  ripl = s.make_puma_church_prime_ripl()
 
   total_birds = 1000 if dataset == 2 else 1000000
   name = "%dx%dx%d-test" % (width, height, total_birds)
@@ -72,4 +72,5 @@ def run(verbose=True, Y=1, D=2, dataset=2, in_path=None, out_path=None, steps=2)
   
   writePredictions(predictions, **params)
 
-run()
+if __name__ == "__main__":
+  run()
