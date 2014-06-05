@@ -18,12 +18,9 @@ def getHypers(ripl):
   return tuple([ripl.sample('hypers%d'%i) for i in range(4)])
 
 
-def run(in_path=None,out_path=None,dataset=2):
+def run(in_path=None,out_path=None,dataset=2, transitions=(100,100,25), iterations=50, runs=4 )
+):
     
-    runs = 2 # 4
-    transitions = (1,1,1) # (100,100,25)
-    iterations = 2 # 50
-
     allHypers = []
 
     for run in range(runs):
