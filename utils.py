@@ -16,8 +16,13 @@ def update(dict, key, data):
   
   dict[key].append(data)
 
-def readFeatures(filename):
-  csv = loadCSV(filename)
+def readFeatures(in_path=None, dataset=None, name=None, **params):
+  if in_path is None:
+    in_path = "data/input/"
+  features_file = in_path + "dataset%d/%s-features.csv" % (dataset, name)
+  
+  print "Loading features from %s" % features_file
+  csv = loadCSV(features_file)
   data = {}
   
   for row in csv[1:]:
@@ -27,10 +32,10 @@ def readFeatures(filename):
   
   return data
 
-def readObservations(path=None, dataset=None, name=None, **params):
-  if path is None:
-    path = "data/input/"
-  observations_file = path + "dataset%d/%s-observations.csv" % (dataset, name)
+def readObservations(in_path=None, dataset=None, name=None, **params):
+  if in_path is None:
+    in_path = "data/input/"
+  observations_file = in_path + "dataset%d/%s-observations.csv" % (dataset, name)
 
   csv = loadCSV(observations_file)
   years = {}
@@ -53,10 +58,10 @@ def readReconstruction(params):
   
   return bird_moves
 
-def writeReconstruction(bird_moves, path=None, dataset=None, name=None, **params):
-  if path is None:
-    path = "data/output/"
-  filename = path + "dataset%d/%s-reconstruction.csv" % (dataset, name)
+def writeReconstruction(bird_moves, out_path=None, dataset=None, name=None, **params):
+  if out_path is None:
+    out_path = "data/output/"
+  filename = out_path + "dataset%d/%s-reconstruction.csv" % (dataset, name)
   ensure(filename)
   
   with open(filename, 'w') as f:
@@ -67,10 +72,10 @@ def writeReconstruction(bird_moves, path=None, dataset=None, name=None, **params
   
   print "Wrote reconstruction to " + filename
 
-def writePredictions(predictions, path=None, dataset=None, name=None, **params):
-  if path is None:
-    path = "data/output/"
-  filename = path + "dataset%d/%s-prediction.csv" % (dataset, name)
+def writePredictions(predictions, out_path=None, dataset=None, name=None, **params):
+  if out_path is None:
+    out_path = "data/output/"
+  filename = out_path + "dataset%d/%s-prediction.csv" % (dataset, name)
   ensure(filename)
   
   with open(filename, 'w') as f:
@@ -81,10 +86,10 @@ def writePredictions(predictions, path=None, dataset=None, name=None, **params):
   
   print "Wrote predictions to " + filename
 
-def writeHypers(hypers, path=None, dataset=None, **params):
-  if path is None:
-    path = "data/output/"
-  filename = path + "dataset%d/estimated-parameters.csv" % dataset
+def writeHypers(hypers, out_path=None, dataset=None, **params):
+  if out_path is None:
+    out_path = "data/output/"
+  filename = out_path + "dataset%d/estimated-parameters.csv" % dataset
   ensure(filename)
   
   with open(filename, 'w') as f:

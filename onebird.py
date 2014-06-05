@@ -13,7 +13,7 @@ D = 3
 
 runs=1
 
-def run(y, days, runs, path=None):
+def run(y, days, runs, in_path=None):
   ripl = s.make_puma_church_prime_ripl()
   
   params = {
@@ -22,7 +22,7 @@ def run(y, days, runs, path=None):
     "cells":cells,
     "years":[y],
     "days":days,
-    "path":path
+    "in_path":in_path
   }
 
   onebird = OneBird(ripl, params)
