@@ -15,10 +15,10 @@ import sys
 dataset = 2
 if len(sys.argv) > 1:
     dataset = int(sys.argv[1])
-elif len(sys.argv)>2:
+
+output_dir = None
+if len(sys.argv)>2:
     output_dir = sys.argv[2]
-else:
-    output_dir = None
     #output_dir = 'data/output/dataset%s/'%dataset
 
 print output_dir
@@ -41,7 +41,7 @@ def getHypers(ripl):
 #   print "Wrote parameters to " + filename
 
 
-runs = 1 # 4
+runs = 2 # 4
 transitions = (1,1,1) # (100,100,25)
 iterations = 2 # 50
 
