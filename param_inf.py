@@ -27,7 +27,7 @@ def run(in_path=None,out_path=None,dataset=2):
     allHypers = []
 
     for run in range(runs):
-        model = makeModel(dataset=dataset, D=3, learnHypers=True, hyperPrior='(gamma 1 .1)')
+        model = makeModel(dataset=dataset, D=3, learnHypers=True, hyperPrior='(gamma 1 .1)', in_path=in_path, out_path=out_path)
 
         posteriorLogs,model,moves,locs = getMoves(model,slice_hypers=False,
                                                   transitions=transitions,iterations=iterations,

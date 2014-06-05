@@ -5,7 +5,7 @@ ripl = s.make_puma_church_prime_ripl()
 from utils import *
 from model_param import Poisson, num_features
 
-def makeModel(dataset=2, D=3, Y=1, learnHypers=True, hyperPrior='(gamma 1 .1)'):
+def makeModel(dataset=2, D=3, Y=1, learnHypers=True, hyperPrior='(gamma 1 .1)',in_path=None, out_path=None):
   width,height = 10,10
   cells = width * height
   total_birds = 1000 if dataset == 2 else 1000000
@@ -23,7 +23,9 @@ def makeModel(dataset=2, D=3, Y=1, learnHypers=True, hyperPrior='(gamma 1 .1)'):
   "years":range(Y),
   "days":[],
   "hypers":hypers,
-  "maxDay":D}
+  "maxDay":D,
+  "in_path":in_path,
+  "out_path":out_path}
 
   model = Poisson(ripl,params)
 
