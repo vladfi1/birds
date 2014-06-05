@@ -36,7 +36,7 @@ def run(y, days, runs, path=None):
   history.hypers = [avgFinalValue(history, 'hypers%d' % k) for k in range(num_features)]
   history.save(directory="%s/%d" % (name, y))
 
-def runInParallel(Y=Y, D=D, runs=runs, path=None):
+def runInParallel(Y=Y, D=D, runs=runs, path=None, **kwargs):
   from multiprocessing import Process
 
   processes = []
@@ -49,7 +49,7 @@ def runInParallel(Y=Y, D=D, runs=runs, path=None):
   for y in range(Y):
     processes[y].join()
 
-def computeHypers(Y=Y, path=None):
+def computeHypers(Y=Y, path=None, **kwargs):
   histories = []
 
   import pickle
@@ -70,6 +70,9 @@ def computeHypers(Y=Y, path=None):
   
   writeHypers(means, path=path, dataset=1)
 
+def doOneBird(inPath=None, outPath=None, **kwargs):
+  runInParallel(path=inPath, **kwargs)
+  computeHypers(path=outPath, **kwargs)
+
 if __name__ == "__main__":
-  runInParallel(path='data/input/')
-  computeHypers(path='data/output/')
+  doOneBird()
