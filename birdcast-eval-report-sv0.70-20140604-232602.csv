@@ -1,0 +1,8 @@
+Dataset,Evaluation Metric,Value,(Value.Prediction.Tonight),(Value.Prediction.TomorrowNight)
+Dataset1,Parameters Squared Difference,9.084812580218815
+Dataset2,Reconstruction Squared Difference,74843.0,,
+,Prediction Squared Difference,256450.0,117287.0,139163.0
+,Parameters Squared Difference,0.0,,
+Dataset3,Reconstruction Squared Difference,88324627.0,,
+,Prediction Squared Difference,284121190.0,116733003.0,167388187.0
+,Parameters Squared Difference,0.0,,

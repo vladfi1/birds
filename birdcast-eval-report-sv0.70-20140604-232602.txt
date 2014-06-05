@@ -1,0 +1,7 @@
+Dataset 1 Parameters Squared Difference: 9.08481258022
+Dataset 2 Reconstruction Squared Difference: 74843.0
+Dataset 2 Prediction Squared Difference: 117287.0 139163.0 256450.0
+Dataset 2 Parameters Squared Difference: 0
+Dataset 3 Reconstruction Squared Difference: 88324627.0
+Dataset 3 Prediction Squared Difference: 116733003.0 167388187.0 284121190.0
+Dataset 3 Parameters Squared Difference: 0
