@@ -113,7 +113,7 @@ def run(model,iterations=1, transitions=(100,50,50), baseDirectory='',slice_hype
 
 
 def posteriorSamples(model, slice_hypers=False, runs=10, baseDirectory=None,
-                     iterations=5, transitions=(100,100,25):
+                     iterations=5, transitions=(100,100,25)):
   
   if baseDirectory is None:
     baseDirectory = 'posteriorSamples_'+str(np.random.randint(10**4))+'/'
