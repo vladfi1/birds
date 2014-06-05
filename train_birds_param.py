@@ -112,7 +112,8 @@ def run(model,iterations=1, transitions=(100,50,50), baseDirectory='',slice_hype
 
 
 
-def posteriorSamples(model, slice_hypers=False, runs=10, baseDirectory=None, iterations=5, transitions=1000):
+def posteriorSamples(model, slice_hypers=False, runs=10, baseDirectory=None,
+                     iterations=5, transitions=(100,100,25):
   
   if baseDirectory is None:
     baseDirectory = 'posteriorSamples_'+str(np.random.randint(10**4))+'/'
@@ -142,7 +143,7 @@ def posteriorSamples(model, slice_hypers=False, runs=10, baseDirectory=None, ite
   return posteriorLogs,lastModel
 
 
-def getMoves(model,slice_hypers=False, transitions=1000,iterations=1,label=''):
+def getMoves(model,slice_hypers=False, transitions=(100,100,25),iterations=1,label=''):
   
   basedir = label + 'getMoves_'+str(np.random.randint(10**4))+'/'
   print '====\n getMoves basedir:', basedir

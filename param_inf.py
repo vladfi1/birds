@@ -1,5 +1,6 @@
 import scipy.stats
 from train_birds_param import *
+from utils import writeHypers
 import numpy as np
 import sys
 
@@ -26,18 +27,18 @@ print output_dir
 def getHypers(ripl):
   return tuple([ripl.sample('hypers%d'%i) for i in range(4)])
 
-def writeHypers(hypers, path=None, dataset=None):
-  if path is None:
-    path = "data/output/"
-  filename = path + "dataset%d/estimated-parameters.csv" % dataset
-  ensure(filename)
+# def writeHypers(hypers, path=None, dataset=None):
+#   if path is None:
+#     path = "data/output/"
+#   filename = path + "dataset%d/estimated-parameters.csv" % dataset
+#   ensure(filename)
   
-  with open(filename, 'w') as f:
-    f.write("b1,b2,b3,b4\n")
-    f.write(','.join(map(str, hypers)))
-    f.write('\n')
+#   with open(filename, 'w') as f:
+#     f.write("b1,b2,b3,b4\n")
+#     f.write(','.join(map(str, hypers)))
+#     f.write('\n')
 
-  print "Wrote parameters to " + filename
+#   print "Wrote parameters to " + filename
 
 
 runs = 1 # 4
