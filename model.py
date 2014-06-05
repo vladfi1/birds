@@ -140,7 +140,7 @@ class OneBird(VentureUnit):
 
 class Poisson(VentureUnit):
 
-  def __init__(self, ripl, params):
+  def __init__(self, ripl, params, ground=False):
     self.name = params['name']
     self.width = params['width']
     self.height = params['height']
@@ -150,8 +150,9 @@ class Poisson(VentureUnit):
     self.years = params['years']
     self.days = params['days']
     self.hypers = params["hypers"]
-    self.ground = readReconstruction(params)
-    self.features = loadFeatures(self.dataset, self.name, self.years, self.days)
+    if ground:
+      self.ground = readReconstruction(params)
+    self.features = loadFeatures(**params)
     super(Poisson, self).__init__(ripl, params)
 
   def loadAssumes(self, ripl = None):
@@ -268,11 +269,14 @@ class Poisson(VentureUnit):
   
   def updateObserves(self, d):
     self.days.append(d)
-    #if d > 0: self.ripl.forget('bird_moves')
     
-    loadObservations(self.ripl, days=[d], **self.parameters)
+    days = self.parameters['days']
+    self.parameters['days'] = [d]
+    
+    loadObservations(self.ripl, **self.parameters)
     self.ripl.infer('(incorporate)')
-    #self.ripl.predict(fold('array', '(get_birds_moving3 __d)', '__d', len(self.days)-1), label='bird_moves')
+    
+    self.parameters['days'] = days + [d]
   
   def getBirdLocations(self, years=None, days=None):
     if years is None: years = self.years
