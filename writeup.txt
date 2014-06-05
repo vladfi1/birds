@@ -19,7 +19,7 @@ ripl.assume('phi', """
     (let ((fs (lookup features (array y d i j))))
       (exp (foldl + 0 0 num_features hypers)))))"""
 
-# distribution over cells a bird would move to from
+# the distribution over cells a bird would move to from
 # cell i on day d
 ripl.assume('get_bird_move_dist',
   '(mem (lambda (y d i) ' +
@@ -45,4 +45,7 @@ ripl.infer('(slice hypers one 400)')
 
 Results:
 
-There appears to be a great deal of posterior uncertainty, both between runs and from year to year. Averaging does result in estimates which are comparable to the ground truths. [How should results be displayed?]
+Means: [5.2992897878009568, 12.726660563129466, 9.1976418073875994, 10.957487183992191]
+Stds:  [3.5611990261546418, 5.3139856839901549, 6.0035955586205807, 3.2525265375760615]
+
+There appears to be a great deal of posterior uncertainty, both between runs and from year to year. Averaging does result in estimates which are comparable to the ground truths.
