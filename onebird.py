@@ -68,7 +68,7 @@ def computeHypers(Y=Y, path=None, **kwargs):
   print "Means: " + str(means)
   print "Stds:  " + str(stds)
   
-  writeHypers(means, path=path, dataset=1)
+  writeHypers(means, out_path=path, dataset=1)
 
 def doOneBird(inPath=None, outPath=None, **kwargs):
   runInParallel(path=inPath, **kwargs)
