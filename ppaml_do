@@ -4,9 +4,12 @@ import sys
 import onebird
 import predict_birds
 import train_birds
+import param_inf
 
 onebird.doOneBird(sys.argv[2], sys.argv[3])
 predict_birds.run(in_path=sys.argv[2], out_path=sys.argv[3], D=1, steps=0)
 train_birds.run(in_path=sys.argv[2], out_path=sys.argv[3], D=1, steps=0)
 predict_birds.run(in_path=sys.argv[2], out_path=sys.argv[3], dataset=3, D=1, steps=0)
 train_birds.run(in_path=sys.argv[2], out_path=sys.argv[3], dataset=3, D=1, steps=0)
+
+param_inf.run(in_path=sys.argv[2], out_path=sys.argv[3], dataset=3)
